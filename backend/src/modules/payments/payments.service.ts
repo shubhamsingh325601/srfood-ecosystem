@@ -4,7 +4,7 @@ import { BadRequestError, NotFoundError, UnauthorizedError } from '@/utils/error
 import { logger } from '@/utils/logger';
 
 import { paymentsRepository } from './payments.repository';
-import { Razorpay, razorpayClient } from './razorpay.client';
+import { Razorpay, getRazorpayClient } from './razorpay.client';
 
 interface RazorpayWebhookPayload {
   id: string;
@@ -30,7 +30,7 @@ export interface WebhookOutcome {
 
 export const paymentsService = {
   async createForOrder(orderId: string, amountPaise: number, method: PaymentMethod) {
-    const razorpayOrder = await razorpayClient.orders.create({
+    const razorpayOrder = await getRazorpayClient().orders.create({
       amount: amountPaise,
       currency: 'INR',
       receipt: orderId,
@@ -94,7 +94,7 @@ export const paymentsService = {
     if (!payment) throw new NotFoundError('Payment not found for this order');
     if (!payment.razorpayPaymentId) throw new BadRequestError('No captured payment to refund for this order');
 
-    const refund = await razorpayClient.payments.refund(payment.razorpayPaymentId, { amount: amountPaise, notes: { reason } });
+    const refund = await getRazorpayClient().payments.refund(payment.razorpayPaymentId, { amount: amountPaise, notes: { reason } });
 
     const alreadyRefunded = payment.refunds.reduce((sum, r) => sum + r.amountPaise, 0) + amountPaise;
     const newStatus = alreadyRefunded >= payment.amountPaise ? PaymentStatus.REFUNDED : PaymentStatus.PARTIAL_REFUND;
