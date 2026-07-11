@@ -2,7 +2,7 @@ import { Heart, Plus, Star } from "lucide-react";
 import { motion } from "motion/react";
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 import type { Food } from "@/data/foods";
 import { useCartStore } from "@/store/cartStore";
 import { toast } from "sonner";

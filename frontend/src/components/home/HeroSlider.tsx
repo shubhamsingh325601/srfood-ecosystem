@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "motion/react";
 import { ArrowRight, Clock } from "lucide-react";
 import { Link } from "@tanstack/react-router";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 import { getHomepage } from "@/features/cms/services/cmsApi";
 import heroThali from "@/assets/hero-thali.jpg";
 

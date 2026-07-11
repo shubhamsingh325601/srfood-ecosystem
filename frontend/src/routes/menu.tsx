@@ -4,8 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
 import { Search, SlidersHorizontal } from "lucide-react";
 import { FoodCard } from "@/components/home/FoodCard";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/Button";
 import { getMenu } from "@/features/menu/services/menuApi";
 import { buildCategoryNameMap, mapMenuItemToFood } from "@/features/menu/mappers";
 

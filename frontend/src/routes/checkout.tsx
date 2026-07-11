@@ -21,8 +21,8 @@ import { createOrder } from "@/features/orders/services/ordersApi";
 import { openRazorpayCheckout } from "@/features/payments/razorpayCheckout";
 import { getStations } from "@/features/stations/services/stationsApi";
 import { getApiErrorMessage } from "@/lib/axios";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {

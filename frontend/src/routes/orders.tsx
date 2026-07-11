@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 import { Package } from "lucide-react";
 import { listOrders } from "@/features/orders/services/ordersApi";
 import { toDisplayStatus } from "@/features/orders/statusDisplay";

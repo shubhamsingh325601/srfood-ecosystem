@@ -14,7 +14,7 @@ import {
   Leaf,
 } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 import { FoodCard } from "@/components/home/FoodCard";
 import { getMenu, getMenuItem } from "@/features/menu/services/menuApi";
 import { buildCategoryNameMap, mapMenuItemToFood } from "@/features/menu/mappers";
