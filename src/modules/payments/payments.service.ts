@@ -1,86 +1,55 @@
+import { randomUUID } from 'crypto';
+
 import { config } from '@/config/index';
 import { PaymentMethod, PaymentStatus } from '@/types/domain.types';
-import { BadRequestError, NotFoundError, UnauthorizedError } from '@/utils/errors';
-import { logger } from '@/utils/logger';
+import { BadRequestError, ConflictError, NotFoundError } from '@/utils/errors';
 
 import { paymentsRepository } from './payments.repository';
-import { Razorpay, razorpayClient } from './razorpay.client';
-
-interface RazorpayWebhookPayload {
-  id: string;
-  event: string;
-  payload: {
-    payment?: {
-      entity: {
-        id: string;
-        order_id: string;
-        amount: number;
-        error_description?: string;
-      };
-    };
-  };
-}
-
-export interface WebhookOutcome {
-  orderId: string;
-  status: 'CAPTURED' | 'FAILED';
-  amountPaise: number;
-  razorpayPaymentId: string;
-}
+import { buildUpiLink } from './upi.util';
 
 export const paymentsService = {
   async createForOrder(orderId: string, amountPaise: number, method: PaymentMethod) {
-    const razorpayOrder = await razorpayClient.orders.create({
-      amount: amountPaise,
-      currency: 'INR',
-      receipt: orderId,
-    });
-
-    await paymentsRepository.create({
-      orderId,
-      razorpayOrderId: razorpayOrder.id,
+    const transactionRef = orderId;
+    const upiLink = buildUpiLink({
+      vpa: config.upi.vpa,
+      payeeName: config.upi.payeeName,
       amountPaise,
-      method,
-      status: PaymentStatus.PENDING,
+      transactionRef,
+      note: `SR Food order ${orderId}`,
     });
 
-    return { razorpayOrderId: razorpayOrder.id, amountPaise, currency: 'INR', keyId: config.razorpay.keyId };
+    await paymentsRepository.create({ orderId, transactionRef, amountPaise, method, status: PaymentStatus.PENDING });
+
+    return {
+      upiLink,
+      payeeVpa: config.upi.vpa,
+      payeeName: config.upi.payeeName,
+      amountPaise,
+      currency: 'INR',
+      transactionRef,
+    };
   },
 
   async recordCodPayment(orderId: string, amountPaise: number) {
     return paymentsRepository.create({ orderId, amountPaise, method: PaymentMethod.COD, status: PaymentStatus.PENDING });
   },
 
-  /** Verifies the HMAC signature per Razorpay's documented scheme (non-negotiable per CLAUDE.md §14) before trusting any webhook payload. */
-  async verifyAndHandleWebhook(rawBody: string, signature: string | undefined): Promise<WebhookOutcome | null> {
-    if (!signature || !Razorpay.validateWebhookSignature(rawBody, signature, config.razorpay.webhookSecret)) {
-      throw new UnauthorizedError('Invalid webhook signature');
-    }
+  /** Self-reported by the customer after paying via their UPI app — no gateway confirms this, so the caller (payments.controller) still moves the order forward on trust, per the product's trust-first-verify-after model (ADR 0003). */
+  async recordSelfReportedPayment(orderId: string, utr: string) {
+    const payment = await paymentsRepository.findByOrderId(orderId);
+    if (!payment) throw new NotFoundError('Payment not found for this order');
+    if (payment.status !== PaymentStatus.PENDING) throw new ConflictError('Payment for this order has already been resolved');
 
-    const event: RazorpayWebhookPayload = JSON.parse(rawBody);
-    const paymentEntity = event.payload.payment?.entity;
-    if (!paymentEntity) return null;
+    return paymentsRepository.markCaptured(payment._id.toString(), utr);
+  },
 
-    const payment = await paymentsRepository.findByRazorpayOrderId(paymentEntity.order_id);
-    if (!payment) {
-      logger.warn('Webhook received for unknown razorpayOrderId', { razorpayOrderId: paymentEntity.order_id });
-      return null;
-    }
+  /** Self-reported by the customer when they cancelled or the UPI app declined the payment — no gateway to confirm this either, so we just take their word for it and free the order up to retry. */
+  async declinePayment(orderId: string) {
+    const payment = await paymentsRepository.findByOrderId(orderId);
+    if (!payment) throw new NotFoundError('Payment not found for this order');
+    if (payment.status !== PaymentStatus.PENDING) throw new ConflictError('Payment for this order has already been resolved');
 
-    const alreadyProcessed = await paymentsRepository.hasProcessedEvent(payment._id.toString(), event.id);
-    if (alreadyProcessed) return null;
-
-    if (event.event === 'payment.captured') {
-      await paymentsRepository.markCaptured(payment._id.toString(), paymentEntity.id, event.id);
-      return { orderId: payment.orderId.toString(), status: 'CAPTURED', amountPaise: paymentEntity.amount, razorpayPaymentId: paymentEntity.id };
-    }
-
-    if (event.event === 'payment.failed') {
-      await paymentsRepository.markFailed(payment._id.toString(), paymentEntity.error_description ?? 'Payment failed', event.id);
-      return { orderId: payment.orderId.toString(), status: 'FAILED', amountPaise: paymentEntity.amount, razorpayPaymentId: paymentEntity.id };
-    }
-
-    return null;
+    return paymentsRepository.markFailed(payment._id.toString(), 'Customer reported payment as failed/cancelled');
   },
 
   async getStatus(orderId: string) {
@@ -89,19 +58,18 @@ export const paymentsService = {
     return payment;
   },
 
+  /** No gateway to call for a refund — records the intent; the actual UPI transfer back is done manually by admin outside the system. */
   async refund(orderId: string, amountPaise: number, reason: string) {
     const payment = await paymentsRepository.findByOrderId(orderId);
     if (!payment) throw new NotFoundError('Payment not found for this order');
-    if (!payment.razorpayPaymentId) throw new BadRequestError('No captured payment to refund for this order');
-
-    const refund = await razorpayClient.payments.refund(payment.razorpayPaymentId, { amount: amountPaise, notes: { reason } });
+    if (payment.status !== PaymentStatus.CAPTURED) throw new BadRequestError('No captured payment to refund for this order');
 
     const alreadyRefunded = payment.refunds.reduce((sum, r) => sum + r.amountPaise, 0) + amountPaise;
     const newStatus = alreadyRefunded >= payment.amountPaise ? PaymentStatus.REFUNDED : PaymentStatus.PARTIAL_REFUND;
 
     return paymentsRepository.addRefund(
       payment._id.toString(),
-      { refundId: refund.id, amountPaise, reason, status: 'PROCESSED', processedAt: new Date() },
+      { refundId: randomUUID(), amountPaise, reason, status: 'INITIATED' },
       newStatus,
     );
   },

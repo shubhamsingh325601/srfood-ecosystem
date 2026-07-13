@@ -46,5 +46,6 @@ export const settingsContentSchema = z.object({
   contactEmail: z.string().trim().email(),
   contactPhone: z.string().trim(),
   contactAddress: z.string().trim().max(300),
+  whatsappNumber: z.string().trim().min(8, 'Enter a valid WhatsApp number with country code'),
 });
 export type SettingsContentInput = z.infer<typeof settingsContentSchema>;

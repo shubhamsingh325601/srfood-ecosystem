@@ -28,10 +28,9 @@ export const config = {
     apiKey: env.CLOUDINARY_API_KEY,
     apiSecret: env.CLOUDINARY_API_SECRET,
   },
-  razorpay: {
-    keyId: env.RAZORPAY_KEY_ID,
-    keySecret: env.RAZORPAY_KEY_SECRET,
-    webhookSecret: env.RAZORPAY_WEBHOOK_SECRET,
+  upi: {
+    vpa: env.UPI_VPA,
+    payeeName: env.UPI_PAYEE_NAME,
   },
   msg91: {
     authKey: env.MSG91_AUTH_KEY,

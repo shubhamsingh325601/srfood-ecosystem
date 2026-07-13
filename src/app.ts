@@ -23,14 +23,7 @@ export function createApp(): Express {
     }),
   );
   app.use(compression());
-  app.use(
-    express.json({
-      limit: '2mb',
-      verify: (req, _res, buf) => {
-        (req as express.Request).rawBody = buf.toString('utf8');
-      },
-    }),
-  );
+  app.use(express.json({ limit: '2mb' }));
   app.use(express.urlencoded({ extended: true }));
   app.use(requestLogger);
   app.use(publicRateLimiter);

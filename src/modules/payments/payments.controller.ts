@@ -8,20 +8,28 @@ import { sendSuccess } from '@/utils/responseFormatter';
 import { paymentsService } from './payments.service';
 
 export const paymentsController = {
-  /** Orchestrates Payments + Orders from the controller layer so neither module's service imports the other (see orders.service.ts applyPaymentOutcome doc comment). */
-  webhook: asyncHandler(async (req: Request, res: Response) => {
-    const signature = req.headers['x-razorpay-signature'] as string | undefined;
-    const outcome = await paymentsService.verifyAndHandleWebhook(req.rawBody ?? '', signature);
-    if (outcome) {
-      await ordersService.applyPaymentOutcome(outcome.orderId, outcome.status);
-    }
-    res.status(200).json({ success: true, data: { received: true } });
-  }),
-
   getStatus: asyncHandler(async (req: Request, res: Response) => {
     if (!req.user) throw new UnauthorizedError();
     await ordersService.assertOwnership(req.params.orderId, req.user.id);
     const payment = await paymentsService.getStatus(req.params.orderId);
     sendSuccess(res, payment);
+  }),
+
+  /** Customer self-reports their UPI transaction reference after paying — trusted immediately (order moves to ORDER_PLACED), reconciled by admin afterward. See ADR 0003. */
+  submitReference: asyncHandler(async (req: Request, res: Response) => {
+    if (!req.user) throw new UnauthorizedError();
+    await ordersService.assertOwnership(req.params.orderId, req.user.id);
+    await paymentsService.recordSelfReportedPayment(req.params.orderId, req.body.utr);
+    const order = await ordersService.applyPaymentOutcome(req.params.orderId, 'CAPTURED', { utrReference: req.body.utr });
+    sendSuccess(res, order, { message: 'Payment recorded' });
+  }),
+
+  /** Customer reports the UPI payment didn't go through (declined/cancelled in their app) — moves the order to PAYMENT_FAILED so they can retry with a fresh order. */
+  declinePayment: asyncHandler(async (req: Request, res: Response) => {
+    if (!req.user) throw new UnauthorizedError();
+    await ordersService.assertOwnership(req.params.orderId, req.user.id);
+    await paymentsService.declinePayment(req.params.orderId);
+    const order = await ordersService.applyPaymentOutcome(req.params.orderId, 'FAILED');
+    sendSuccess(res, order, { message: 'Payment marked as not completed' });
   }),
 };

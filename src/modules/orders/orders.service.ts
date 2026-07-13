@@ -102,19 +102,18 @@ export const ordersService = {
       await couponsService.recordUsage(validatedCart.couponId, userId, order._id.toString(), validatedCart.couponDiscountPaise);
     }
 
-    const payment = isCod
-      ? await paymentsService.recordCodPayment(order._id.toString(), validatedCart.grandTotal)
-      : await paymentsService.createForOrder(order._id.toString(), validatedCart.grandTotal, input.paymentMethod);
-
     if (isCod) {
+      await paymentsService.recordCodPayment(order._id.toString(), validatedCart.grandTotal);
       await notifyUser(userId, NotificationEvent.ORDER_PLACED, 'Order placed', `Your order ${order.orderId} has been placed.`);
       await notifyAdmins(
         NotificationEvent.ORDER_PLACED,
         'New order received',
         `Order ${order.orderId} — ₹${(order.grandTotal / 100).toFixed(2)} (COD)`,
       );
+      return { order, payment: null, replay: false };
     }
 
+    const payment = await paymentsService.createForOrder(order._id.toString(), validatedCart.grandTotal, input.paymentMethod);
     return { order, payment, replay: false };
   },
 
@@ -216,8 +215,8 @@ export const ordersService = {
     return updated;
   },
 
-  /** Called by the Payments module's webhook controller (not payments.service) to keep the two modules decoupled. */
-  async applyPaymentOutcome(orderId: string, outcome: 'CAPTURED' | 'FAILED') {
+  /** Called by the Payments module's controller (not payments.service) to keep the two modules decoupled. */
+  async applyPaymentOutcome(orderId: string, outcome: 'CAPTURED' | 'FAILED', meta?: { utrReference?: string }) {
     const order = await ordersRepository.findByIdOrOrderId(orderId);
     if (!order) throw new NotFoundError('Order not found for payment outcome');
 
@@ -226,7 +225,7 @@ export const ordersService = {
       const updated = await ordersRepository.appendStatus(
         order._id.toString(),
         { status: OrderStatus.ORDER_PLACED, changedAt: new Date(), note: 'Payment captured' },
-        { paymentStatus: PaymentStatus.CAPTURED },
+        { paymentStatus: PaymentStatus.CAPTURED, utrReference: meta?.utrReference },
       );
       await notifyUser(order.passengerId.toString(), NotificationEvent.ORDER_PLACED, 'Order placed', `Your order ${order.orderId} has been placed.`);
       await notifyAdmins(
