@@ -39,6 +39,7 @@ function ContactPage() {
         contactEmail: "",
         contactPhone: "",
         contactAddress: "",
+        whatsappNumber: "",
       })),
   });
   const {

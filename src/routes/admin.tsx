@@ -1265,6 +1265,11 @@ function OrdersAdmin() {
                       >
                         {o.paymentStatus}
                       </div>
+                      {o.utrReference && (
+                        <div className="text-xs text-muted-foreground font-mono mt-0.5">
+                          UTR: {o.utrReference}
+                        </div>
+                      )}
                     </TableCell>
                     <TableCell className="font-bold">₹{paiseToRupees(o.grandTotal)}</TableCell>
                     <TableCell>
@@ -1577,6 +1582,7 @@ function ContentAdmin() {
     contactEmail: "",
     contactPhone: "",
     contactAddress: "",
+    whatsappNumber: "",
   };
 
   const { data: homepage } = useQuery({
@@ -1870,6 +1876,16 @@ function ContentAdmin() {
               value={settingsDraft.contactAddress}
               onChange={(e) =>
                 setSettingsDraft({ ...settingsDraft, contactAddress: e.target.value })
+              }
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label>WhatsApp Number</Label>
+            <Input
+              placeholder="+91 98765 43210"
+              value={settingsDraft.whatsappNumber}
+              onChange={(e) =>
+                setSettingsDraft({ ...settingsDraft, whatsappNumber: e.target.value })
               }
             />
           </div>

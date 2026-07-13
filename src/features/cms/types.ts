@@ -29,4 +29,5 @@ export interface SettingsContent {
   contactEmail: string;
   contactPhone: string;
   contactAddress: string;
+  whatsappNumber: string;
 }

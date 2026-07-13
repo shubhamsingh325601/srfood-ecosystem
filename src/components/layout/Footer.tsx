@@ -10,6 +10,7 @@ const EMPTY_SETTINGS: SettingsContent = {
   contactEmail: "",
   contactPhone: "",
   contactAddress: "",
+  whatsappNumber: "",
 };
 
 export function Footer() {

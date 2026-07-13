@@ -21,6 +21,7 @@ export interface AdminOrder {
   status: string;
   paymentMethod: string;
   paymentStatus: string;
+  utrReference?: string;
   grandTotal: number;
   createdAt: string;
   pnr?: string;

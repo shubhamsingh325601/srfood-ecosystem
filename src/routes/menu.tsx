@@ -28,7 +28,7 @@ export const Route = createFileRoute("/menu")({
   component: MenuPage,
 });
 
-type Diet = "all" | "veg" | "nonveg";
+type Diet = "all" | "veg";
 type Sort = "popular" | "price-asc" | "price-desc" | "rating";
 
 function useMenuData() {
@@ -67,7 +67,7 @@ function MenuPage() {
     let r = foods.filter(
       (f) =>
         (cat === "All" || f.category === cat) &&
-        (diet === "all" || (diet === "veg" ? f.veg : !f.veg)) &&
+        (diet === "all" || f.veg) &&
         (q === "" ||
           f.name.toLowerCase().includes(q.toLowerCase()) ||
           f.desc.toLowerCase().includes(q.toLowerCase())),
@@ -118,7 +118,7 @@ function MenuPage() {
         {/* Diet + sort */}
         <div className="flex flex-wrap items-center gap-2">
           <SlidersHorizontal className="w-4 h-4 text-muted-foreground" />
-          {(["all", "veg", "nonveg"] as Diet[]).map((d) => (
+          {(["all", "veg"] as Diet[]).map((d) => (
             <Button
               key={d}
               size="sm"
@@ -126,7 +126,7 @@ function MenuPage() {
               onClick={() => setDiet(d)}
               className="rounded-full h-9 px-4 capitalize"
             >
-              {d === "all" ? "All" : d === "veg" ? "🌱 Veg" : "🍗 Non-Veg"}
+              {d === "all" ? "All" : "🌱 Veg"}
             </Button>
           ))}
           <div className="ml-auto flex items-center gap-2">
