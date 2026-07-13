@@ -1,24 +1,26 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
-  CreditCard,
   Smartphone,
-  Wallet,
   Banknote,
   CheckCircle2,
   MapPin,
   Loader2,
   Check,
   ChevronsUpDown,
+  Copy,
+  ArrowRight,
 } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 import { useCartStore, selectCartTotal } from "@/store/cartStore";
 import { useAuthStore } from "@/store/authStore";
 import { createOrder } from "@/features/orders/services/ordersApi";
-import { openRazorpayCheckout } from "@/features/payments/razorpayCheckout";
+import { submitPaymentReference, declinePayment } from "@/features/payments/services/paymentsApi";
+import type { UpiPaymentInfo } from "@/features/orders/types";
 import { getStations } from "@/features/stations/services/stationsApi";
 import { getApiErrorMessage } from "@/lib/axios";
 import { Button } from "@/components/ui/Button";
@@ -63,8 +65,15 @@ function CheckoutPage() {
   const clearCart = useCartStore((s) => s.clear);
   const currentUser = useAuthStore((s) => s.user);
   const nav = useNavigate();
-  const [payment, setPayment] = useState<"Card" | "UPI" | "COD" | "Wallet">("UPI");
+  const [payment, setPayment] = useState<"UPI" | "COD">("UPI");
   const [placed, setPlaced] = useState<string | null>(null);
+  const [pendingPayment, setPendingPayment] = useState<{ orderId: string; upi: UpiPaymentInfo } | null>(null);
+  const [awaitingReturn, setAwaitingReturn] = useState(false);
+  const [showConfirmPrompt, setShowConfirmPrompt] = useState(false);
+  const [confirmChoice, setConfirmChoice] = useState<"yes" | null>(null);
+  const [utr, setUtr] = useState("");
+  const [confirming, setConfirming] = useState(false);
+  const [declining, setDeclining] = useState(false);
   const [locating, setLocating] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [idempotencyKey] = useState(() => crypto.randomUUID());
@@ -92,6 +101,24 @@ function CheckoutPage() {
   });
 
   const stationValue = watch("station");
+
+  // After "Proceed to Pay" sends the browser to the UPI app, detect when the user comes back to
+  // this tab and prompt them for what happened — there's no gateway callback to detect it for us.
+  useEffect(() => {
+    if (!awaitingReturn) return;
+    const onReturn = () => {
+      if (document.visibilityState === "visible") {
+        setAwaitingReturn(false);
+        setShowConfirmPrompt(true);
+      }
+    };
+    document.addEventListener("visibilitychange", onReturn);
+    window.addEventListener("focus", onReturn);
+    return () => {
+      document.removeEventListener("visibilitychange", onReturn);
+      window.removeEventListener("focus", onReturn);
+    };
+  }, [awaitingReturn]);
 
   const detectLocation = () => {
     if (!("geolocation" in navigator)) {
@@ -184,20 +211,9 @@ function CheckoutPage() {
       );
 
       if (paymentInfo) {
-        const result = await openRazorpayCheckout({
-          keyId: paymentInfo.keyId,
-          amountPaise: paymentInfo.amountPaise,
-          currency: paymentInfo.currency,
-          razorpayOrderId: paymentInfo.razorpayOrderId,
-          customerName: data.name,
-          customerEmail: data.email,
-          customerPhone: data.phone,
-        });
-        if (!result) {
-          toast.error("Payment cancelled — you can complete payment from My Orders");
-          setSubmitting(false);
-          return;
-        }
+        setPendingPayment({ orderId: order._id, upi: paymentInfo });
+        setSubmitting(false);
+        return;
       }
 
       clearCart();
@@ -209,6 +225,140 @@ function CheckoutPage() {
       setSubmitting(false);
     }
   };
+
+  const confirmUpiPayment = async () => {
+    if (!pendingPayment) return;
+    if (utr.trim().length < 4) {
+      toast.error("Enter the UPI transaction / reference number from your payment app");
+      return;
+    }
+    setConfirming(true);
+    try {
+      const order = await submitPaymentReference(pendingPayment.orderId, utr.trim());
+      clearCart();
+      toast.success(`Order ${order.orderId} placed!`);
+      setPlaced(order.orderId);
+      setPendingPayment(null);
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, "Could not record your payment"));
+    } finally {
+      setConfirming(false);
+    }
+  };
+
+  const handleDeclinePayment = async () => {
+    if (!pendingPayment) return;
+    setDeclining(true);
+    try {
+      await declinePayment(pendingPayment.orderId);
+      toast.error("Payment not completed — you can try again whenever you're ready.");
+      setPendingPayment(null);
+      setAwaitingReturn(false);
+      setShowConfirmPrompt(false);
+      setConfirmChoice(null);
+      setUtr("");
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, "Could not update payment status"));
+    } finally {
+      setDeclining(false);
+    }
+  };
+
+  if (pendingPayment) {
+    const { upi } = pendingPayment;
+    return (
+      <div className="max-w-md mx-auto py-10 px-4">
+        <div className="bg-card border rounded-2xl p-6 space-y-5 text-center">
+          <Smartphone className="w-10 h-10 mx-auto text-primary" />
+          <div>
+            <h1 className="text-xl font-bold">Pay via UPI</h1>
+            <p className="text-muted-foreground text-sm mt-1">
+              Tap below to pay ₹{(upi.amountPaise / 100).toFixed(2)} — it'll open your UPI app
+              directly.
+            </p>
+          </div>
+
+          <Button
+            asChild
+            size="lg"
+            className="w-full rounded-full h-12"
+            onClick={() => setAwaitingReturn(true)}
+          >
+            <a href={upi.upiLink}>
+              Proceed to Pay ₹{(upi.amountPaise / 100).toFixed(2)}
+              <ArrowRight className="w-4 h-4 ml-1.5" />
+            </a>
+          </Button>
+
+          <details className="text-left">
+            <summary className="text-xs text-muted-foreground text-center cursor-pointer hover:text-foreground">
+              On a computer? Scan the QR from your phone instead
+            </summary>
+            <div className="flex justify-center mt-3">
+              <div className="p-3 bg-white rounded-xl border">
+                <QRCodeSVG value={upi.upiLink} size={160} />
+              </div>
+            </div>
+          </details>
+
+          <button
+            type="button"
+            onClick={() => {
+              navigator.clipboard.writeText(upi.payeeVpa);
+              toast.success("UPI ID copied");
+            }}
+            className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground mx-auto hover:text-foreground"
+          >
+            <Copy className="w-3 h-3" />
+            Pay manually to {upi.payeeVpa}
+          </button>
+
+          {!showConfirmPrompt ? (
+            <button
+              type="button"
+              onClick={() => setShowConfirmPrompt(true)}
+              className="text-xs text-primary underline underline-offset-2 mx-auto block"
+            >
+              Already paid? Confirm here
+            </button>
+          ) : confirmChoice !== "yes" ? (
+            <div className="border-t pt-4 space-y-3 text-left">
+              <p className="text-sm font-medium text-center">Did your payment go through?</p>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  className="flex-1 rounded-full"
+                  onClick={handleDeclinePayment}
+                  disabled={declining}
+                >
+                  {declining ? "…" : "No, it failed"}
+                </Button>
+                <Button className="flex-1 rounded-full" onClick={() => setConfirmChoice("yes")}>
+                  Yes, I've paid
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="border-t pt-4 space-y-2 text-left">
+              <Label>UPI transaction / reference number (UTR)</Label>
+              <Input
+                placeholder="e.g. 123456789012"
+                value={utr}
+                onChange={(e) => setUtr(e.target.value)}
+                autoFocus
+              />
+              <p className="text-xs text-muted-foreground">
+                Enter the reference number shown in your UPI app so we can confirm your order.
+              </p>
+              <Button className="w-full rounded-full" onClick={confirmUpiPayment} disabled={confirming}>
+                {confirming ? "Confirming…" : "Confirm Order"}
+              </Button>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   if (placed) {
     return (
@@ -232,8 +382,6 @@ function CheckoutPage() {
 
   const methods = [
     { k: "UPI", I: Smartphone, label: "UPI" },
-    { k: "Card", I: CreditCard, label: "Card" },
-    { k: "Wallet", I: Wallet, label: "Wallet" },
     { k: "COD", I: Banknote, label: "Cash on Delivery" },
   ] as const;
 
@@ -335,7 +483,7 @@ function CheckoutPage() {
 
         <section className="bg-card border rounded-2xl p-5 space-y-3">
           <h2 className="font-bold">Payment Method</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 gap-3">
             {methods.map(({ k, I, label }) => (
               <button
                 type="button"

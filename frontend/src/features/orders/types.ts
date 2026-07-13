@@ -10,7 +10,7 @@ export interface CreateOrderPayload {
     items: CreateOrderCartItem[];
     couponCode?: string;
   };
-  paymentMethod: "Card" | "UPI" | "COD" | "Wallet";
+  paymentMethod: "UPI" | "COD";
   pnr?: string;
   coach?: string;
   seat?: string;
@@ -19,11 +19,13 @@ export interface CreateOrderPayload {
   deliveryStation: string;
 }
 
-export interface RazorpayPaymentInfo {
-  razorpayOrderId: string;
+export interface UpiPaymentInfo {
+  upiLink: string;
+  payeeVpa: string;
+  payeeName: string;
   amountPaise: number;
   currency: string;
-  keyId: string;
+  transactionRef: string;
 }
 
 export interface ApiOrder {
@@ -42,6 +44,6 @@ export interface ApiOrder {
 
 export interface CreateOrderResult {
   order: ApiOrder;
-  payment: RazorpayPaymentInfo | null;
+  payment: UpiPaymentInfo | null;
   replay: boolean;
 }
