@@ -116,6 +116,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: ReactNode }) {
+  if (import.meta.env.SPA_BUILD) {
+    return <>{children}</>;
+  }
   return (
     <html lang="en">
       <head>
