@@ -50,6 +50,8 @@ export interface OrderDocument {
   paymentMode: PaymentMode;
   paymentMethod: PaymentMethod;
   paymentStatus: PaymentStatus;
+  /** Customer-submitted UPI transaction/reference number (UTR), denormalized from Payment for admin-list reconciliation. */
+  utrReference?: string;
   idempotencyKey: string;
   cancellationReason?: string;
   isDeleted: boolean;
@@ -110,6 +112,7 @@ const orderSchema = new Schema<OrderDocument>(
     paymentMode: { type: String, enum: Object.values(PaymentMode), required: true },
     paymentMethod: { type: String, enum: Object.values(PaymentMethod), required: true },
     paymentStatus: { type: String, enum: Object.values(PaymentStatus), required: true, default: PaymentStatus.PENDING },
+    utrReference: { type: String },
     idempotencyKey: { type: String, required: true, unique: true },
     cancellationReason: { type: String },
     isDeleted: { type: Boolean, default: false },

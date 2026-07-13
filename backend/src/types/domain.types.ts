@@ -105,10 +105,8 @@ export enum PaymentMode {
 }
 
 export enum PaymentMethod {
-  CARD = 'Card',
   UPI = 'UPI',
   COD = 'COD',
-  WALLET = 'Wallet',
 }
 
 export enum PaymentStatus {

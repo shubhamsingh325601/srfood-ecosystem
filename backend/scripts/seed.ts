@@ -323,6 +323,7 @@ async function seedCmsContent(): Promise<void> {
         contactEmail: 'support@srfood.example',
         contactPhone: '+91 98765 43210',
         contactAddress: 'SR Food HQ, Sector 21, New Delhi, India',
+        whatsappNumber: '+91 6378639934',
       },
     },
   ];

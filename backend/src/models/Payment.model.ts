@@ -14,9 +14,10 @@ export interface RefundRecord {
 export interface PaymentDocument {
   _id: Types.ObjectId;
   orderId: Types.ObjectId;
-  razorpayOrderId?: string;
-  razorpayPaymentId?: string;
-  razorpaySignature?: string;
+  /** Our own reference embedded in the UPI deep link's `tr` param. Set for UPI, absent for COD. */
+  transactionRef?: string;
+  /** Customer-submitted UPI transaction/reference number (UTR), used for post-hoc reconciliation. */
+  utrReference?: string;
   amountPaise: number;
   currency: string;
   method: PaymentMethod;
@@ -24,7 +25,6 @@ export interface PaymentDocument {
   capturedAt?: Date;
   failureReason?: string;
   refunds: RefundRecord[];
-  webhookEventIds: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -43,9 +43,8 @@ const refundSchema = new Schema<RefundRecord>(
 const paymentSchema = new Schema<PaymentDocument>(
   {
     orderId: { type: Schema.Types.ObjectId, ref: 'Order', required: true, index: true },
-    razorpayOrderId: { type: String, unique: true, sparse: true },
-    razorpayPaymentId: { type: String, unique: true, sparse: true },
-    razorpaySignature: { type: String },
+    transactionRef: { type: String, unique: true, sparse: true },
+    utrReference: { type: String },
     amountPaise: { type: Number, required: true },
     currency: { type: String, default: 'INR' },
     method: { type: String, enum: Object.values(PaymentMethod), required: true },
@@ -53,7 +52,6 @@ const paymentSchema = new Schema<PaymentDocument>(
     capturedAt: { type: Date },
     failureReason: { type: String },
     refunds: { type: [refundSchema], default: [] },
-    webhookEventIds: { type: [String], default: [] },
   },
   { timestamps: true },
 );

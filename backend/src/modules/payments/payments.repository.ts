@@ -2,7 +2,7 @@ import { Payment } from '@/models/Payment.model';
 import type { PaymentMethod, PaymentStatus } from '@/types/domain.types';
 
 export const paymentsRepository = {
-  async create(data: { orderId: string; razorpayOrderId?: string; amountPaise: number; method: PaymentMethod; status: PaymentStatus }) {
+  async create(data: { orderId: string; transactionRef?: string; amountPaise: number; method: PaymentMethod; status: PaymentStatus }) {
     return Payment.create(data);
   },
 
@@ -10,33 +10,16 @@ export const paymentsRepository = {
     return Payment.findOne({ orderId });
   },
 
-  async findByRazorpayOrderId(razorpayOrderId: string) {
-    return Payment.findOne({ razorpayOrderId });
-  },
-
-  async hasProcessedEvent(paymentId: string, eventId: string) {
-    return Payment.exists({ _id: paymentId, webhookEventIds: eventId });
-  },
-
-  async markCaptured(paymentId: string, razorpayPaymentId: string, eventId: string) {
+  async markCaptured(paymentId: string, utrReference?: string) {
     return Payment.findByIdAndUpdate(
       paymentId,
-      {
-        status: 'captured',
-        razorpayPaymentId,
-        capturedAt: new Date(),
-        $addToSet: { webhookEventIds: eventId },
-      },
+      { status: 'captured', utrReference, capturedAt: new Date() },
       { new: true },
     );
   },
 
-  async markFailed(paymentId: string, failureReason: string, eventId: string) {
-    return Payment.findByIdAndUpdate(
-      paymentId,
-      { status: 'failed', failureReason, $addToSet: { webhookEventIds: eventId } },
-      { new: true },
-    );
+  async markFailed(paymentId: string, failureReason: string) {
+    return Payment.findByIdAndUpdate(paymentId, { status: 'failed', failureReason }, { new: true });
   },
 
   async addRefund(
