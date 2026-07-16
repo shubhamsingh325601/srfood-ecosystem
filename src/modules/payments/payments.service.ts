@@ -1,6 +1,7 @@
 import { randomUUID } from 'crypto';
 
-import { config } from '@/config/index';
+import { cmsService } from '@/modules/cms/cms.service';
+import type { SettingsContentInput } from '@/modules/cms/cms.dto';
 import { PaymentMethod, PaymentStatus } from '@/types/domain.types';
 import { BadRequestError, ConflictError, NotFoundError } from '@/utils/errors';
 
@@ -9,10 +10,11 @@ import { buildUpiLink } from './upi.util';
 
 export const paymentsService = {
   async createForOrder(orderId: string, amountPaise: number, method: PaymentMethod) {
+    const settings = (await cmsService.getSettings()) as SettingsContentInput;
     const transactionRef = orderId;
     const upiLink = buildUpiLink({
-      vpa: config.upi.vpa,
-      payeeName: config.upi.payeeName,
+      vpa: settings.upiVpa,
+      payeeName: settings.upiPayeeName,
       amountPaise,
       transactionRef,
       note: `SR Food order ${orderId}`,
@@ -22,8 +24,8 @@ export const paymentsService = {
 
     return {
       upiLink,
-      payeeVpa: config.upi.vpa,
-      payeeName: config.upi.payeeName,
+      payeeVpa: settings.upiVpa,
+      payeeName: settings.upiPayeeName,
       amountPaise,
       currency: 'INR',
       transactionRef,

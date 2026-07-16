@@ -1,4 +1,3 @@
-import { authService } from '@/modules/auth/auth.service';
 import { uploadImageBuffer } from '@/services/cloudinary.service';
 import { BadRequestError, NotFoundError } from '@/utils/errors';
 import { comparePassword, hashPassword } from '@/utils/hash';
@@ -38,12 +37,7 @@ export const usersService = {
     await usersRepository.updatePassword(userId, passwordHash);
   },
 
-  async requestMobileChangeOtp(newMobile: string) {
-    return authService.sendOtp({ identifier: newMobile, purpose: 'CHANGE_MOBILE' });
-  },
-
   async changeMobile(userId: string, input: ChangeMobileInput) {
-    await authService.verifyOtp({ identifier: input.newMobile, purpose: 'CHANGE_MOBILE', code: input.otpCode }, {});
     const user = await usersRepository.updateMobile(userId, input.newMobile);
     if (!user) throw new NotFoundError('User not found');
     return user;
@@ -75,16 +69,9 @@ export const usersService = {
     return user;
   },
 
-  async requestDeletionOtp(userId: string) {
+  async deleteAccount(userId: string) {
     const user = await usersRepository.findById(userId);
     if (!user) throw new NotFoundError('User not found');
-    return authService.sendOtp({ identifier: user.email, purpose: 'SENSITIVE_ACTION' });
-  },
-
-  async deleteAccount(userId: string, otpCode: string) {
-    const user = await usersRepository.findById(userId);
-    if (!user) throw new NotFoundError('User not found');
-    await authService.verifyOtp({ identifier: user.email, purpose: 'SENSITIVE_ACTION', code: otpCode }, {});
     await usersRepository.softDelete(userId);
   },
 

@@ -20,7 +20,6 @@ export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
 
 export const changeMobileSchema = z.object({
   newMobile: z.string().trim().regex(/^[6-9]\d{9}$/),
-  otpCode: z.string().trim().length(6).regex(/^\d{6}$/),
 });
 export type ChangeMobileInput = z.infer<typeof changeMobileSchema>;
 
@@ -36,11 +35,6 @@ export const updateNotificationSettingsSchema = z.object({
   promotionalEnabled: z.boolean().optional(),
 });
 export type UpdateNotificationSettingsInput = z.infer<typeof updateNotificationSettingsSchema>;
-
-export const deleteAccountSchema = z.object({
-  otpCode: z.string().trim().length(6).regex(/^\d{6}$/),
-});
-export type DeleteAccountInput = z.infer<typeof deleteAccountSchema>;
 
 export const userIdParamSchema = z.object({
   id: z.string().regex(/^[a-f0-9]{24}$/i),

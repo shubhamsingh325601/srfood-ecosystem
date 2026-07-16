@@ -16,9 +16,6 @@ const envSchema = z.object({
   CLOUDINARY_API_KEY: z.string().optional().default(''),
   CLOUDINARY_API_SECRET: z.string().optional().default(''),
 
-  UPI_VPA: z.string().optional().default(''),
-  UPI_PAYEE_NAME: z.string().optional().default('SR Food'),
-
   MSG91_AUTH_KEY: z.string().optional().default(''),
   MSG91_SENDER_ID: z.string().optional().default(''),
 
@@ -40,12 +37,6 @@ const envSchema = z.object({
     .string()
     .default('true')
     .transform((v) => v === 'true'),
-
-  /** Dev-only: when set, every OTP is this fixed code and is never actually dispatched via SMS/email. Forced off in production regardless of this value — see config/index.ts. */
-  OTP_BYPASS_CODE: z
-    .string()
-    .regex(/^\d{6}$/, 'OTP_BYPASS_CODE must be exactly 6 digits')
-    .optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;

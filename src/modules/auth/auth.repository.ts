@@ -1,4 +1,3 @@
-import { Otp, type OtpPurpose } from '@/models/Otp.model';
 import { RefreshToken } from '@/models/RefreshToken.model';
 import { User, type UserDocument } from '@/models/User.model';
 
@@ -21,11 +20,7 @@ export const authRepository = {
     return isMobileIdentifier(identifier) ? this.findByMobile(identifier) : this.findByEmail(identifier);
   },
 
-  async existsByEmailOrMobile(email: string, mobile: string) {
-    return User.exists({ $or: [{ email: email.toLowerCase() }, { mobile }], isDeleted: false });
-  },
-
-  async createUser(data: { name: string; email: string; mobile: string; passwordHash: string }) {
+  async createUser(data: { name: string; mobile: string; passwordHash: string }) {
     return User.create(data);
   },
 
@@ -47,26 +42,6 @@ export const authRepository = {
 
   async updatePasswordHash(userId: string, passwordHash: string) {
     await User.findByIdAndUpdate(userId, { passwordHash });
-  },
-
-  async markVerified(userId: string, field: 'isMobileVerified' | 'isEmailVerified') {
-    await User.findByIdAndUpdate(userId, { [field]: true });
-  },
-
-  async createOtp(data: { identifier: string; purpose: OtpPurpose; codeHash: string; expiresAt: Date; resendCount: number }) {
-    return Otp.create(data);
-  },
-
-  async findLatestActiveOtp(identifier: string, purpose: OtpPurpose) {
-    return Otp.findOne({ identifier, purpose, isConsumed: false }).sort({ createdAt: -1 });
-  },
-
-  async consumeOtp(otpId: string) {
-    await Otp.findByIdAndUpdate(otpId, { isConsumed: true });
-  },
-
-  async incrementOtpAttempt(otpId: string) {
-    await Otp.findByIdAndUpdate(otpId, { $inc: { attemptCount: 1 } });
   },
 
   async createRefreshToken(data: { userId: string; tokenHash: string; expiresAt: Date; ipAddress?: string; userAgent?: string }) {

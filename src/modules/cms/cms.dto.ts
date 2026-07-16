@@ -47,5 +47,7 @@ export const settingsContentSchema = z.object({
   contactPhone: z.string().trim(),
   contactAddress: z.string().trim().max(300),
   whatsappNumber: z.string().trim().min(8, 'Enter a valid WhatsApp number with country code'),
+  upiVpa: z.string().trim().regex(/^[\w.-]+@[\w.-]+$/, 'Enter a valid UPI ID (e.g. name@bank)'),
+  upiPayeeName: z.string().trim().min(1).max(100),
 });
 export type SettingsContentInput = z.infer<typeof settingsContentSchema>;

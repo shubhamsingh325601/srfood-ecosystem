@@ -19,6 +19,17 @@ const adminRoles = [UserRole.ADMIN, UserRole.SUPER_ADMIN];
  *     summary: Order funnel (placed to delivered/cancelled)
  *     tags: [Analytics]
  *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - { in: query, name: from, schema: { type: string, format: date-time } }
+ *       - { in: query, name: to, schema: { type: string, format: date-time } }
+ *     responses:
+ *       '200':
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/AnalyticsFunnelResponse' }
+ *       '401': { $ref: '#/components/responses/Unauthorized' }
+ *       '403': { $ref: '#/components/responses/Forbidden' }
  */
 analyticsRoutes.get('/funnel', requireAuth, requireRole(...adminRoles), validate({ query: dateRangeSchema }), analyticsController.funnel);
 
@@ -29,6 +40,17 @@ analyticsRoutes.get('/funnel', requireAuth, requireRole(...adminRoles), validate
  *     summary: Daily revenue trend
  *     tags: [Analytics]
  *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - { in: query, name: from, schema: { type: string, format: date-time } }
+ *       - { in: query, name: to, schema: { type: string, format: date-time } }
+ *     responses:
+ *       '200':
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/AnalyticsRevenueResponse' }
+ *       '401': { $ref: '#/components/responses/Unauthorized' }
+ *       '403': { $ref: '#/components/responses/Forbidden' }
  */
 analyticsRoutes.get('/revenue', requireAuth, requireRole(...adminRoles), validate({ query: dateRangeSchema }), analyticsController.revenueTrend);
 
@@ -39,6 +61,17 @@ analyticsRoutes.get('/revenue', requireAuth, requireRole(...adminRoles), validat
  *     summary: Order volume by delivery station
  *     tags: [Analytics]
  *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - { in: query, name: from, schema: { type: string, format: date-time } }
+ *       - { in: query, name: to, schema: { type: string, format: date-time } }
+ *     responses:
+ *       '200':
+ *         description: OK — top 20 stations by order count
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/AnalyticsStationsResponse' }
+ *       '401': { $ref: '#/components/responses/Unauthorized' }
+ *       '403': { $ref: '#/components/responses/Forbidden' }
  */
 analyticsRoutes.get('/stations', requireAuth, requireRole(...adminRoles), validate({ query: dateRangeSchema }), analyticsController.stationHeatmap);
 
@@ -49,5 +82,16 @@ analyticsRoutes.get('/stations', requireAuth, requireRole(...adminRoles), valida
  *     summary: Payment method/status breakdown
  *     tags: [Analytics]
  *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - { in: query, name: from, schema: { type: string, format: date-time } }
+ *       - { in: query, name: to, schema: { type: string, format: date-time } }
+ *     responses:
+ *       '200':
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/AnalyticsPaymentsResponse' }
+ *       '401': { $ref: '#/components/responses/Unauthorized' }
+ *       '403': { $ref: '#/components/responses/Forbidden' }
  */
 analyticsRoutes.get('/payments', requireAuth, requireRole(...adminRoles), validate({ query: dateRangeSchema }), analyticsController.paymentBreakdown);

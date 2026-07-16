@@ -17,12 +17,10 @@ export interface UserPreferences {
 export interface UserDocument {
   _id: Types.ObjectId;
   name: string;
-  email: string;
+  email?: string;
   mobile: string;
   passwordHash: string;
   role: UserRole;
-  isEmailVerified: boolean;
-  isMobileVerified: boolean;
   isBlocked: boolean;
   isDeleted: boolean;
   profilePhotoUrl?: string;
@@ -38,12 +36,10 @@ export interface UserDocument {
 const userSchema = new Schema<UserDocument>(
   {
     name: { type: String, required: true, trim: true, minlength: 2, maxlength: 80 },
-    email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+    email: { type: String, unique: true, sparse: true, lowercase: true, trim: true },
     mobile: { type: String, required: true, unique: true, trim: true },
     passwordHash: { type: String, required: true, select: false },
     role: { type: String, enum: Object.values(UserRole), default: UserRole.PASSENGER, required: true },
-    isEmailVerified: { type: Boolean, default: false },
-    isMobileVerified: { type: Boolean, default: false },
     isBlocked: { type: Boolean, default: false },
     isDeleted: { type: Boolean, default: false },
     profilePhotoUrl: { type: String },

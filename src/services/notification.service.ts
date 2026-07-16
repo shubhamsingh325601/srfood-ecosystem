@@ -47,7 +47,10 @@ export async function notifyUser(userId: string, event: NotificationEvent, title
 
   const dispatchChannels: { channel: NotificationChannel; enabled: boolean; to: string }[] = [
     { channel: NotificationChannel.SMS, enabled: user.notificationSettings.smsEnabled, to: user.mobile },
-    { channel: NotificationChannel.EMAIL, enabled: user.notificationSettings.emailEnabled, to: user.email },
+    // Accounts register with mobile only — email is optional, so there's nothing to dispatch to without one.
+    ...(user.email
+      ? [{ channel: NotificationChannel.EMAIL, enabled: user.notificationSettings.emailEnabled, to: user.email }]
+      : []),
   ];
 
   for (const { channel, enabled, to } of dispatchChannels) {
