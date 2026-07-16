@@ -19,9 +19,13 @@ export interface CartItem {
 
 interface CartState {
   items: CartItem[];
+  couponCode: string | null;
+  couponDiscountPaise: number;
   addItem: (item: Omit<CartItem, "quantity">, qty?: number) => void;
   setQuantity: (menuItemId: string, qty: number) => void;
   removeItem: (menuItemId: string) => void;
+  applyCoupon: (code: string, discountPaise: number) => void;
+  removeCoupon: () => void;
   clear: () => void;
 }
 
@@ -33,6 +37,8 @@ export const useCartStore = create<CartState>()(
   persist(
     (set, get) => ({
       items: [],
+      couponCode: null,
+      couponDiscountPaise: 0,
       addItem: (item, qty = 1) => {
         const state = get();
         const key = itemKey(item);
@@ -54,7 +60,9 @@ export const useCartStore = create<CartState>()(
         })),
       removeItem: (menuItemId) =>
         set((state) => ({ items: state.items.filter((i) => i.menuItemId !== menuItemId) })),
-      clear: () => set({ items: [] }),
+      applyCoupon: (code, discountPaise) => set({ couponCode: code, couponDiscountPaise: discountPaise }),
+      removeCoupon: () => set({ couponCode: null, couponDiscountPaise: 0 }),
+      clear: () => set({ items: [], couponCode: null, couponDiscountPaise: 0 }),
     }),
     { name: "srfood_cart_v1" },
   ),

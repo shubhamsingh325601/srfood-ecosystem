@@ -1,17 +1,23 @@
-import { Heart, Plus, Star } from "lucide-react";
+import { Heart, Minus, Plus, Star } from "lucide-react";
 import { motion } from "motion/react";
-import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import type { Food } from "@/data/foods";
 import { useCartStore } from "@/store/cartStore";
+import { useFavoritesStore } from "@/store/favoritesStore";
 import { toast } from "sonner";
 
 export type { Food };
 
 export function FoodCard({ food }: { food: Food }) {
-  const [fav, setFav] = useState(false);
+  const isFavorite = useFavoritesStore((s) => s.isFavorite(food.id));
+  const toggleFavorite = useFavoritesStore((s) => s.toggleFavorite);
+  const quantity = useCartStore(
+    (s) =>
+      s.items.find((i) => i.menuItemId === food.id && i.customizations.length === 0)?.quantity ?? 0,
+  );
   const addItem = useCartStore((s) => s.addItem);
+  const setQuantity = useCartStore((s) => s.setQuantity);
 
   const handleAddToCart = () => {
     addItem({
@@ -47,12 +53,12 @@ export function FoodCard({ food }: { food: Food }) {
         <button
           onClick={(e) => {
             e.preventDefault();
-            setFav(!fav);
+            toggleFavorite(food.id);
           }}
           className="absolute top-2 right-2 w-8 h-8 grid place-items-center rounded-full bg-background/90 backdrop-blur hover:scale-110 transition"
           aria-label="Favourite"
         >
-          <Heart className={`w-4 h-4 ${fav ? "fill-primary text-primary" : "text-foreground"}`} />
+          <Heart className={`w-4 h-4 ${isFavorite ? "fill-primary text-primary" : "text-foreground"}`} />
         </button>
       </Link>
       <div className="p-3 space-y-2 flex-1 flex flex-col">
@@ -81,13 +87,33 @@ export function FoodCard({ food }: { food: Food }) {
         <p className="text-xs text-muted-foreground line-clamp-2 min-h-[2rem]">{food.desc}</p>
         <div className="flex items-center justify-between pt-1 mt-auto">
           <span className="font-bold">₹{food.price}</span>
-          <Button
-            size="sm"
-            className="rounded-md h-8 gap-1 px-3 text-xs font-bold"
-            onClick={handleAddToCart}
-          >
-            Add <Plus className="w-3 h-3" />
-          </Button>
+          {quantity > 0 ? (
+            <div className="flex items-center border rounded-md overflow-hidden h-8">
+              <button
+                onClick={() => setQuantity(food.id, quantity - 1)}
+                className="w-8 h-8 grid place-items-center hover:bg-muted"
+                aria-label="Decrease quantity"
+              >
+                <Minus className="w-3 h-3" />
+              </button>
+              <span className="w-6 text-center text-xs font-bold">{quantity}</span>
+              <button
+                onClick={() => setQuantity(food.id, quantity + 1)}
+                className="w-8 h-8 grid place-items-center hover:bg-muted"
+                aria-label="Increase quantity"
+              >
+                <Plus className="w-3 h-3" />
+              </button>
+            </div>
+          ) : (
+            <Button
+              size="sm"
+              className="rounded-md h-8 gap-1 px-3 text-xs font-bold"
+              onClick={handleAddToCart}
+            >
+              Add <Plus className="w-3 h-3" />
+            </Button>
+          )}
         </div>
       </div>
     </motion.div>

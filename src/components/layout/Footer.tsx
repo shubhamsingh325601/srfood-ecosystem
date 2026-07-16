@@ -11,6 +11,8 @@ const EMPTY_SETTINGS: SettingsContent = {
   contactPhone: "",
   contactAddress: "",
   whatsappNumber: "",
+  upiVpa: "",
+  upiPayeeName: "",
 };
 
 export function Footer() {

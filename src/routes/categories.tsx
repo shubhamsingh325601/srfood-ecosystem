@@ -14,6 +14,7 @@ function useCategoriesWithCounts() {
       const { categories, items } = await getMenu();
       return categories.map((c) => ({
         name: c.name,
+        slug: c.slug,
         imageUrl: c.imageUrl,
         count: items.filter((i) => i.categoryId === c._id).length,
         sampleImageUrl: items.find((i) => i.categoryId === c._id)?.imageUrl ?? c.imageUrl,
@@ -37,6 +38,7 @@ function CategoriesPage() {
             <Link
               key={c.name}
               to="/menu"
+              search={{ category: c.slug }}
               className="bg-card border rounded-2xl p-4 hover:shadow-card hover:border-primary/30 transition group"
             >
               {c.sampleImageUrl && (

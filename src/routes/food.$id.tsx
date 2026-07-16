@@ -20,6 +20,7 @@ import { getMenu, getMenuItem } from "@/features/menu/services/menuApi";
 import { buildCategoryNameMap, mapMenuItemToFood } from "@/features/menu/mappers";
 import { getMenuItemRatings } from "@/features/ratings/services/ratingsApi";
 import { useCartStore } from "@/store/cartStore";
+import { useFavoritesStore } from "@/store/favoritesStore";
 
 export const Route = createFileRoute("/food/$id")({
   head: () => ({ meta: [{ title: "Dish – SRFOOD" }] }),
@@ -55,7 +56,8 @@ function FoodDetailPage() {
   const { data, isLoading, isError } = useFoodDetail(id);
   const { data: ratings } = useFoodRatings(id);
   const [qty, setQty] = useState(1);
-  const [fav, setFav] = useState(false);
+  const isFavorite = useFavoritesStore((s) => s.isFavorite(id));
+  const toggleFavorite = useFavoritesStore((s) => s.toggleFavorite);
   const addItem = useCartStore((s) => s.addItem);
 
   if (isLoading) {
@@ -220,11 +222,11 @@ function FoodDetailPage() {
             <Button
               size="icon"
               variant="outline"
-              onClick={() => setFav(!fav)}
+              onClick={() => toggleFavorite(id)}
               className="rounded-full w-11 h-11"
               aria-label="Favourite"
             >
-              <Heart className={`w-4 h-4 ${fav ? "fill-primary text-primary" : ""}`} />
+              <Heart className={`w-4 h-4 ${isFavorite ? "fill-primary text-primary" : ""}`} />
             </Button>
             <Button
               size="lg"

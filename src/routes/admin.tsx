@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, type UseFormRegisterReturn } from "react-hook-form";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,11 +50,12 @@ import {
   MapPin,
   Bell,
   Eye,
+  EyeOff,
 } from "lucide-react";
 import { toast } from "sonner";
+import { z } from "zod";
 import { Logo } from "@/components/brand/Logo";
 import { login, logoutRequest } from "@/features/auth/services/authApi";
-import { loginSchema, type LoginFormValues } from "@/features/auth/schemas/authSchemas";
 import { isAdminRole, useAuthStore } from "@/store/authStore";
 import { getApiErrorMessage } from "@/lib/axios";
 import {
@@ -242,17 +243,43 @@ function AdminPage() {
   );
 }
 
+const adminLoginSchema = z.object({
+  mobile: z
+    .string()
+    .trim()
+    .regex(/^[6-9]\d{9}$/, "Enter a valid 10-digit mobile number"),
+  password: z.string().min(1, "Password is required"),
+});
+type AdminLoginFormValues = z.infer<typeof adminLoginSchema>;
+
+function AdminPasswordInput({ field }: { field: UseFormRegisterReturn }) {
+  const [visible, setVisible] = useState(false);
+  return (
+    <div className="relative">
+      <Input type={visible ? "text" : "password"} className="pr-10" {...field} />
+      <button
+        type="button"
+        onClick={() => setVisible((v) => !v)}
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+        aria-label={visible ? "Hide password" : "Show password"}
+      >
+        {visible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+      </button>
+    </div>
+  );
+}
+
 function AdminLoginForm() {
   const setSession = useAuthStore((s) => s.setSession);
   const {
     register: field,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<LoginFormValues>({ resolver: zodResolver(loginSchema) });
+  } = useForm<AdminLoginFormValues>({ resolver: zodResolver(adminLoginSchema) });
 
-  const onSubmit = async (values: LoginFormValues) => {
+  const onSubmit = async (values: AdminLoginFormValues) => {
     try {
-      const { tokens, user } = await login(values.identifier, values.password);
+      const { tokens, user } = await login(values.mobile, values.password);
       if (!isAdminRole(user.role)) {
         toast.error("This account does not have admin access");
         return;
@@ -260,22 +287,20 @@ function AdminLoginForm() {
       setSession(user, tokens.accessToken, tokens.refreshToken);
       toast.success(`Welcome back, ${user.name}`);
     } catch (error) {
-      toast.error(getApiErrorMessage(error, "Invalid email/mobile or password"));
+      toast.error(getApiErrorMessage(error, "Invalid mobile number or password"));
     }
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-3 text-left">
       <div className="space-y-1.5">
-        <Label>Email or Mobile</Label>
-        <Input {...field("identifier")} />
-        {errors.identifier && (
-          <p className="text-xs text-destructive">{errors.identifier.message}</p>
-        )}
+        <Label>Mobile Number</Label>
+        <Input inputMode="numeric" maxLength={10} placeholder="9876543210" {...field("mobile")} />
+        {errors.mobile && <p className="text-xs text-destructive">{errors.mobile.message}</p>}
       </div>
       <div className="space-y-1.5">
         <Label>Password</Label>
-        <Input type="password" {...field("password")} />
+        <AdminPasswordInput field={field("password")} />
         {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
       </div>
       <Button type="submit" className="w-full" disabled={isSubmitting}>
@@ -1583,6 +1608,8 @@ function ContentAdmin() {
     contactPhone: "",
     contactAddress: "",
     whatsappNumber: "",
+    upiVpa: "",
+    upiPayeeName: "",
   };
 
   const { data: homepage } = useQuery({
@@ -1887,6 +1914,32 @@ function ContentAdmin() {
               onChange={(e) =>
                 setSettingsDraft({ ...settingsDraft, whatsappNumber: e.target.value })
               }
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-card border rounded-2xl p-5 space-y-3">
+        <h2 className="font-bold">Payment Settings</h2>
+        <p className="text-sm text-muted-foreground">
+          The UPI ID customers pay into. Every order's payment link is built from this — update it
+          here if the receiving account changes.
+        </p>
+        <div className="grid md:grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <Label>UPI ID (VPA)</Label>
+            <Input
+              placeholder="srfood@ybl"
+              value={settingsDraft.upiVpa}
+              onChange={(e) => setSettingsDraft({ ...settingsDraft, upiVpa: e.target.value })}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Payee Name</Label>
+            <Input
+              placeholder="SR Food"
+              value={settingsDraft.upiPayeeName}
+              onChange={(e) => setSettingsDraft({ ...settingsDraft, upiPayeeName: e.target.value })}
             />
           </div>
         </div>

@@ -40,6 +40,8 @@ function ContactPage() {
         contactPhone: "",
         contactAddress: "",
         whatsappNumber: "",
+        upiVpa: "",
+        upiPayeeName: "",
       })),
   });
   const {

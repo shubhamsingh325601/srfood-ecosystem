@@ -6,7 +6,7 @@ export type UserRole = "PASSENGER" | "SUPPORT_EXEC" | "ADMIN" | "SUPER_ADMIN";
 export interface AuthUser {
   id: string;
   name: string;
-  email: string;
+  email?: string;
   mobile: string;
   role: UserRole;
 }

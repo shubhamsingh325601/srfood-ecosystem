@@ -14,3 +14,16 @@ export async function listActiveCoupons(): Promise<ApiCoupon[]> {
   const { data } = await api.get("/coupons");
   return data.data;
 }
+
+export interface CouponValidationResult {
+  discountPaise: number;
+  code: string;
+}
+
+export async function validateCoupon(
+  code: string,
+  subtotalPaise: number,
+): Promise<CouponValidationResult> {
+  const { data } = await api.post("/coupons/validate", { code, subtotalPaise });
+  return data.data;
+}
