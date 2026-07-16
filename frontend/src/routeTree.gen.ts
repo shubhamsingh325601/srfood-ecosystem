@@ -11,11 +11,13 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TrackRouteImport } from './routes/track'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as OrdersRouteImport } from './routes/orders'
 import { Route as OffersRouteImport } from './routes/offers'
 import { Route as MenuRouteImport } from './routes/menu'
 import { Route as HelpRouteImport } from './routes/help'
+import { Route as FavoritesRouteImport } from './routes/favorites'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as CategoriesRouteImport } from './routes/categories'
@@ -33,6 +35,11 @@ const TrackRoute = TrackRouteImport.update({
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -58,6 +65,11 @@ const MenuRoute = MenuRouteImport.update({
 const HelpRoute = HelpRouteImport.update({
   id: '/help',
   path: '/help',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FavoritesRoute = FavoritesRouteImport.update({
+  id: '/favorites',
+  path: '/favorites',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -109,11 +121,13 @@ export interface FileRoutesByFullPath {
   '/categories': typeof CategoriesRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
+  '/favorites': typeof FavoritesRoute
   '/help': typeof HelpRoute
   '/menu': typeof MenuRoute
   '/offers': typeof OffersRoute
   '/orders': typeof OrdersRoute
   '/privacy': typeof PrivacyRoute
+  '/profile': typeof ProfileRoute
   '/terms': typeof TermsRoute
   '/track': typeof TrackRoute
   '/food/$id': typeof FoodIdRoute
@@ -126,11 +140,13 @@ export interface FileRoutesByTo {
   '/categories': typeof CategoriesRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
+  '/favorites': typeof FavoritesRoute
   '/help': typeof HelpRoute
   '/menu': typeof MenuRoute
   '/offers': typeof OffersRoute
   '/orders': typeof OrdersRoute
   '/privacy': typeof PrivacyRoute
+  '/profile': typeof ProfileRoute
   '/terms': typeof TermsRoute
   '/track': typeof TrackRoute
   '/food/$id': typeof FoodIdRoute
@@ -144,11 +160,13 @@ export interface FileRoutesById {
   '/categories': typeof CategoriesRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
+  '/favorites': typeof FavoritesRoute
   '/help': typeof HelpRoute
   '/menu': typeof MenuRoute
   '/offers': typeof OffersRoute
   '/orders': typeof OrdersRoute
   '/privacy': typeof PrivacyRoute
+  '/profile': typeof ProfileRoute
   '/terms': typeof TermsRoute
   '/track': typeof TrackRoute
   '/food/$id': typeof FoodIdRoute
@@ -163,11 +181,13 @@ export interface FileRouteTypes {
     | '/categories'
     | '/checkout'
     | '/contact'
+    | '/favorites'
     | '/help'
     | '/menu'
     | '/offers'
     | '/orders'
     | '/privacy'
+    | '/profile'
     | '/terms'
     | '/track'
     | '/food/$id'
@@ -180,11 +200,13 @@ export interface FileRouteTypes {
     | '/categories'
     | '/checkout'
     | '/contact'
+    | '/favorites'
     | '/help'
     | '/menu'
     | '/offers'
     | '/orders'
     | '/privacy'
+    | '/profile'
     | '/terms'
     | '/track'
     | '/food/$id'
@@ -197,11 +219,13 @@ export interface FileRouteTypes {
     | '/categories'
     | '/checkout'
     | '/contact'
+    | '/favorites'
     | '/help'
     | '/menu'
     | '/offers'
     | '/orders'
     | '/privacy'
+    | '/profile'
     | '/terms'
     | '/track'
     | '/food/$id'
@@ -215,11 +239,13 @@ export interface RootRouteChildren {
   CategoriesRoute: typeof CategoriesRoute
   CheckoutRoute: typeof CheckoutRoute
   ContactRoute: typeof ContactRoute
+  FavoritesRoute: typeof FavoritesRoute
   HelpRoute: typeof HelpRoute
   MenuRoute: typeof MenuRoute
   OffersRoute: typeof OffersRoute
   OrdersRoute: typeof OrdersRoute
   PrivacyRoute: typeof PrivacyRoute
+  ProfileRoute: typeof ProfileRoute
   TermsRoute: typeof TermsRoute
   TrackRoute: typeof TrackRoute
   FoodIdRoute: typeof FoodIdRoute
@@ -239,6 +265,13 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -274,6 +307,13 @@ declare module '@tanstack/react-router' {
       path: '/help'
       fullPath: '/help'
       preLoaderRoute: typeof HelpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/favorites': {
+      id: '/favorites'
+      path: '/favorites'
+      fullPath: '/favorites'
+      preLoaderRoute: typeof FavoritesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -343,11 +383,13 @@ const rootRouteChildren: RootRouteChildren = {
   CategoriesRoute: CategoriesRoute,
   CheckoutRoute: CheckoutRoute,
   ContactRoute: ContactRoute,
+  FavoritesRoute: FavoritesRoute,
   HelpRoute: HelpRoute,
   MenuRoute: MenuRoute,
   OffersRoute: OffersRoute,
   OrdersRoute: OrdersRoute,
   PrivacyRoute: PrivacyRoute,
+  ProfileRoute: ProfileRoute,
   TermsRoute: TermsRoute,
   TrackRoute: TrackRoute,
   FoodIdRoute: FoodIdRoute,

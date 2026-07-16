@@ -1,7 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Trash2, Minus, Plus, ShoppingBag, ArrowRight } from "lucide-react";
+import { useState } from "react";
+import { Trash2, Minus, Plus, ShoppingBag, ArrowRight, Tag, X } from "lucide-react";
+import { toast } from "sonner";
 import { useCartStore, selectCartTotal } from "@/store/cartStore";
 import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { validateCoupon } from "@/features/coupons/services/couponsApi";
+import { getApiErrorMessage } from "@/lib/axios";
 
 export const Route = createFileRoute("/cart")({
   head: () => ({ meta: [{ title: "Your Cart – SRFOOD" }] }),
@@ -14,10 +19,34 @@ function CartPage() {
   const setQuantity = useCartStore((s) => s.setQuantity);
   const removeItem = useCartStore((s) => s.removeItem);
   const clear = useCartStore((s) => s.clear);
+  const couponCode = useCartStore((s) => s.couponCode);
+  const couponDiscountPaise = useCartStore((s) => s.couponDiscountPaise);
+  const applyCoupon = useCartStore((s) => s.applyCoupon);
+  const removeCoupon = useCartStore((s) => s.removeCoupon);
+
+  const [couponInput, setCouponInput] = useState("");
+  const [applying, setApplying] = useState(false);
 
   const gst = Math.round(cartTotal * 0.05);
   const delivery = cartTotal > 0 ? 29 : 0;
-  const grand = cartTotal + gst + delivery;
+  const discount = Math.round(couponDiscountPaise / 100);
+  const grand = Math.max(0, cartTotal + gst + delivery - discount);
+
+  const handleApplyCoupon = async () => {
+    const code = couponInput.trim().toUpperCase();
+    if (!code) return;
+    setApplying(true);
+    try {
+      const result = await validateCoupon(code, Math.round(cartTotal * 100));
+      applyCoupon(result.code, result.discountPaise);
+      toast.success(`Coupon ${result.code} applied — you saved ₹${Math.round(result.discountPaise / 100)}`);
+      setCouponInput("");
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, "This coupon isn't valid for your cart"));
+    } finally {
+      setApplying(false);
+    }
+  };
 
   if (!items.length) {
     return (
@@ -91,9 +120,48 @@ function CartPage() {
 
       <aside className="bg-card border rounded-2xl p-5 h-fit sticky top-[88px] space-y-3">
         <h2 className="font-bold text-lg">Bill Details</h2>
+
+        {couponCode ? (
+          <div className="flex items-center justify-between text-sm bg-success/10 text-success rounded-lg px-3 py-2">
+            <span className="font-semibold flex items-center gap-1.5">
+              <Tag className="w-3.5 h-3.5" /> {couponCode} applied
+            </span>
+            <button
+              onClick={removeCoupon}
+              aria-label="Remove coupon"
+              className="hover:opacity-70"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-1.5">
+            <div className="flex gap-2">
+              <Input
+                value={couponInput}
+                onChange={(e) => setCouponInput(e.target.value)}
+                placeholder="Enter coupon code"
+                className="h-9"
+              />
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleApplyCoupon}
+                disabled={applying || !couponInput.trim()}
+              >
+                {applying ? "…" : "Apply"}
+              </Button>
+            </div>
+            <Link to="/offers" className="text-xs text-primary hover:underline">
+              View available offers →
+            </Link>
+          </div>
+        )}
+
         <Row label="Item Total" value={`₹${cartTotal}`} />
         <Row label="GST (5%)" value={`₹${gst}`} />
         <Row label="Delivery Fee" value={`₹${delivery}`} />
+        {discount > 0 && <Row label="Coupon Discount" value={`-₹${discount}`} />}
         <div className="border-t pt-3 flex justify-between font-bold text-lg">
           <span>To Pay</span>
           <span>₹{grand}</span>

@@ -18,6 +18,7 @@ import {
 import { QRCodeSVG } from "qrcode.react";
 import { useCartStore, selectCartTotal } from "@/store/cartStore";
 import { useAuthStore } from "@/store/authStore";
+import { useDeliveryStore } from "@/store/deliveryStore";
 import { createOrder } from "@/features/orders/services/ordersApi";
 import { submitPaymentReference, declinePayment } from "@/features/payments/services/paymentsApi";
 import type { UpiPaymentInfo } from "@/features/orders/types";
@@ -63,6 +64,9 @@ function CheckoutPage() {
   const items = useCartStore((s) => s.items);
   const cartTotal = useCartStore(selectCartTotal);
   const clearCart = useCartStore((s) => s.clear);
+  const couponCode = useCartStore((s) => s.couponCode);
+  const couponDiscountPaise = useCartStore((s) => s.couponDiscountPaise);
+  const deliveryTrainNumber = useDeliveryStore((s) => s.trainNumber);
   const currentUser = useAuthStore((s) => s.user);
   const nav = useNavigate();
   const [payment, setPayment] = useState<"UPI" | "COD">("UPI");
@@ -164,7 +168,8 @@ function CheckoutPage() {
 
   const gst = Math.round(cartTotal * 0.05);
   const delivery = cartTotal > 0 ? 29 : 0;
-  const grand = cartTotal + gst + delivery;
+  const discount = Math.round(couponDiscountPaise / 100);
+  const grand = Math.max(0, cartTotal + gst + delivery - discount);
 
   if (!currentUser) {
     return (
@@ -200,11 +205,13 @@ function CheckoutPage() {
               customizations: it.customizations,
               specialNote: it.specialNote,
             })),
+            couponCode: couponCode ?? undefined,
           },
           paymentMethod: payment,
           pnr: data.pnr,
           coach: data.coach,
           seat: data.seat,
+          trainNumber: deliveryTrainNumber ?? undefined,
           deliveryStation: data.station,
         },
         idempotencyKey,
@@ -513,6 +520,12 @@ function CheckoutPage() {
           <Row label="Subtotal" v={cartTotal} />
           <Row label="GST" v={gst} />
           <Row label="Delivery" v={delivery} />
+          {discount > 0 && (
+            <div className="flex justify-between text-success">
+              <span>Coupon Discount{couponCode ? ` (${couponCode})` : ""}</span>
+              <span>-₹{discount}</span>
+            </div>
+          )}
         </div>
         <div className="border-t pt-3 flex justify-between font-bold text-lg">
           <span>Total</span>

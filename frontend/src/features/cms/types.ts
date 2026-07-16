@@ -30,4 +30,6 @@ export interface SettingsContent {
   contactPhone: string;
   contactAddress: string;
   whatsappNumber: string;
+  upiVpa: string;
+  upiPayeeName: string;
 }
