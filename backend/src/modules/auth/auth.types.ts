@@ -8,9 +8,7 @@ export interface AuthTokens {
 export interface AuthenticatedUserView {
   id: string;
   name: string;
-  email: string;
+  email?: string;
   mobile: string;
   role: UserRole;
 }
-
-export type OtpPurposeValue = 'REGISTER' | 'LOGIN' | 'FORGOT_PASSWORD' | 'CHANGE_MOBILE' | 'SENSITIVE_ACTION';

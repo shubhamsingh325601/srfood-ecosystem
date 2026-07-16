@@ -20,7 +20,7 @@ export const usersRepository = {
   },
 
   async updateMobile(id: string, mobile: string) {
-    return User.findByIdAndUpdate(id, { mobile, isMobileVerified: true }, { new: true });
+    return User.findByIdAndUpdate(id, { mobile }, { new: true });
   },
 
   async softDelete(id: string) {

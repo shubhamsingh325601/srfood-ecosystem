@@ -16,12 +16,6 @@ export const PRICING = {
 
 export const DELIVERY_WINDOW_MINUTES = 45;
 
-export const OTP = {
-  LENGTH: 6,
-  VALIDITY_MINUTES: 10,
-  MAX_RESENDS_PER_SESSION: 3,
-} as const;
-
 export const AUTH_LOCKOUT = {
   MAX_FAILED_ATTEMPTS: 5,
   COOLDOWN_MINUTES: 30,

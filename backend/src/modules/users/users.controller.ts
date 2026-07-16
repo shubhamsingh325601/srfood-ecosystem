@@ -31,12 +31,6 @@ export const usersController = {
     sendSuccess(res, null, { message: 'Password changed' });
   }),
 
-  requestMobileChangeOtp: asyncHandler(async (req: Request, res: Response) => {
-    requireUser(req);
-    const result = await usersService.requestMobileChangeOtp(req.body.newMobile);
-    sendSuccess(res, result, { message: 'OTP sent to new mobile number' });
-  }),
-
   changeMobile: asyncHandler(async (req: Request, res: Response) => {
     const user = requireUser(req);
     const me = await usersService.changeMobile(user.id, req.body);
@@ -62,15 +56,9 @@ export const usersController = {
     sendSuccess(res, me, { message: 'Profile photo updated' });
   }),
 
-  requestDeletionOtp: asyncHandler(async (req: Request, res: Response) => {
-    const user = requireUser(req);
-    const result = await usersService.requestDeletionOtp(user.id);
-    sendSuccess(res, result, { message: 'OTP sent to confirm account deletion' });
-  }),
-
   deleteAccount: asyncHandler(async (req: Request, res: Response) => {
     const user = requireUser(req);
-    await usersService.deleteAccount(user.id, req.body.otpCode);
+    await usersService.deleteAccount(user.id);
     sendSuccess(res, null, { message: 'Account deleted' });
   }),
 
