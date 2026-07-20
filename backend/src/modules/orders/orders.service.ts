@@ -23,7 +23,7 @@ const STATUS_NOTIFICATIONS: Partial<Record<OrderStatus, { event: NotificationEve
   [OrderStatus.OUT_FOR_DELIVERY]: {
     event: NotificationEvent.ORDER_OUT_FOR_DELIVERY,
     title: 'Out for delivery',
-    body: (orderId) => `Your order ${orderId} is out for delivery to your seat.`,
+    body: (orderId) => `Your order ${orderId} is out for delivery.`,
   },
   [OrderStatus.DELIVERED]: {
     event: NotificationEvent.ORDER_DELIVERED,
@@ -76,12 +76,9 @@ export const ordersService = {
     const order = await ordersRepository.create({
       orderId,
       passengerId: userId,
-      trainNumber: input.trainNumber,
-      pnr: input.pnr,
-      coach: input.coach,
-      seat: input.seat,
-      boardingStation: input.boardingStation,
-      deliveryStation: input.deliveryStation,
+      customerName: input.customerName,
+      customerMobile: input.customerMobile,
+      deliveryAddress: input.deliveryAddress,
       items: validatedCart.items,
       subtotal: validatedCart.subtotal,
       deliveryFeePaise: validatedCart.deliveryFeePaise,

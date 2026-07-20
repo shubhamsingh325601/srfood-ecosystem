@@ -24,7 +24,6 @@ export interface AdminOrder {
   utrReference?: string;
   grandTotal: number;
   createdAt: string;
-  pnr?: string;
   items: { name: string; quantity: number }[];
 }
 

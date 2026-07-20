@@ -47,7 +47,6 @@ import {
   Palette,
   Star,
   Layers,
-  MapPin,
   Bell,
   Eye,
   EyeOff,
@@ -86,14 +85,6 @@ import {
 import { paiseToRupees } from "@/features/menu/mappers";
 import type { ApiCategory, ApiMenuItem } from "@/features/menu/types";
 import { listAdminRatings, moderateRating } from "@/features/ratings/services/ratingsApi";
-import {
-  getStations,
-  createStation,
-  updateStation,
-  deleteStation,
-  type StationPayload,
-} from "@/features/stations/services/stationsApi";
-import type { ApiStation } from "@/features/stations/types";
 import {
   getHomepage,
   updateHomepage,
@@ -192,10 +183,6 @@ function AdminPage() {
               <Layers className="w-4 h-4" />
               Categories
             </TabsTrigger>
-            <TabsTrigger value="stations" className="gap-1.5">
-              <MapPin className="w-4 h-4" />
-              Stations
-            </TabsTrigger>
             <TabsTrigger value="orders" className="gap-1.5">
               <Package className="w-4 h-4" />
               Orders
@@ -221,9 +208,6 @@ function AdminPage() {
           </TabsContent>
           <TabsContent value="categories">
             <CategoriesAdmin />
-          </TabsContent>
-          <TabsContent value="stations">
-            <StationsAdmin />
           </TabsContent>
           <TabsContent value="orders">
             <OrdersAdmin />
@@ -995,217 +979,6 @@ function CategoryPanel({
                 imageUrl: f.imageUrl || undefined,
                 displayOrder: f.displayOrder,
               });
-            }}
-          >
-            Save
-          </Button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
-  );
-}
-
-function StationsAdmin() {
-  const queryClient = useQueryClient();
-  const { data, isLoading } = useQuery({
-    queryKey: ["admin-stations"],
-    queryFn: () => getStations(),
-  });
-  const stations = data ?? [];
-
-  const [editing, setEditing] = useState<ApiStation | null>(null);
-  const [open, setOpen] = useState(false);
-  const [confirmDel, setConfirmDel] = useState<ApiStation | null>(null);
-
-  const invalidate = () => queryClient.invalidateQueries({ queryKey: ["admin-stations"] });
-
-  const saveMutation = useMutation({
-    mutationFn: (payload: StationPayload) =>
-      editing ? updateStation(editing._id, payload) : createStation(payload),
-    onSuccess: () => {
-      invalidate();
-      toast.success("Saved");
-      setOpen(false);
-    },
-    onError: (e) => toast.error(getApiErrorMessage(e)),
-  });
-  const deleteMutation = useMutation({
-    mutationFn: (id: string) => deleteStation(id),
-    onSuccess: () => {
-      invalidate();
-      toast.success("Deleted");
-    },
-    onError: (e) => toast.error(getApiErrorMessage(e)),
-  });
-
-  if (isLoading) return <p className="text-sm text-muted-foreground py-10 text-center">Loading…</p>;
-
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="font-bold text-lg">Stations ({stations.length})</h2>
-        <Button
-          onClick={() => {
-            setEditing(null);
-            setOpen(true);
-          }}
-        >
-          <Plus className="w-4 h-4 mr-1" />
-          Add Station
-        </Button>
-      </div>
-      <div className="bg-card border rounded-2xl overflow-hidden">
-        {!stations.length ? (
-          <p className="p-6 text-sm text-muted-foreground text-center">
-            No stations yet. Add the stations passengers can select at checkout.
-          </p>
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Station</TableHead>
-                <TableHead>Code</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {stations.map((s) => (
-                <TableRow key={s._id}>
-                  <TableCell className="font-medium">{s.name}</TableCell>
-                  <TableCell className="text-xs text-muted-foreground">{s.code ?? "—"}</TableCell>
-                  <TableCell>
-                    <span
-                      className={`text-xs font-semibold ${s.isActive ? "text-green-600" : "text-muted-foreground"}`}
-                    >
-                      {s.isActive ? "Active" : "Inactive"}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex gap-1 justify-end">
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={() => {
-                          setEditing(s);
-                          setOpen(true);
-                        }}
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </Button>
-                      <Button size="icon" variant="ghost" onClick={() => setConfirmDel(s)}>
-                        <Trash2 className="w-4 h-4 text-destructive" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
-      </div>
-      <StationPanel
-        open={open}
-        onOpenChange={setOpen}
-        station={editing}
-        onSave={(payload) => saveMutation.mutate(payload)}
-      />
-      <ConfirmDialog
-        open={!!confirmDel}
-        title="Delete station?"
-        description={
-          confirmDel ? `"${confirmDel.name}" will no longer be selectable at checkout.` : ""
-        }
-        confirmLabel="Delete"
-        destructive
-        onCancel={() => setConfirmDel(null)}
-        onConfirm={() => {
-          if (confirmDel) deleteMutation.mutate(confirmDel._id);
-          setConfirmDel(null);
-        }}
-      />
-    </div>
-  );
-}
-
-interface StationDraft {
-  name: string;
-  code: string;
-  isActive: boolean;
-}
-
-function StationPanel({
-  open,
-  onOpenChange,
-  station,
-  onSave,
-}: {
-  open: boolean;
-  onOpenChange: (o: boolean) => void;
-  station: ApiStation | null;
-  onSave: (payload: StationPayload) => void;
-}) {
-  const empty: StationDraft = { name: "", code: "", isActive: true };
-  const toDraft = (s: ApiStation | null): StationDraft =>
-    s ? { name: s.name, code: s.code ?? "", isActive: s.isActive } : empty;
-  const [f, setF] = useState<StationDraft>(toDraft(station));
-
-  useEffect(() => {
-    if (open) setF(toDraft(station));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, station]);
-
-  return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-[380px] sm:max-w-[380px] flex flex-col p-0">
-        <SheetHeader className="p-5 border-b">
-          <SheetTitle>{station ? "Edit Station" : "Add Station"}</SheetTitle>
-        </SheetHeader>
-        <div className="flex-1 overflow-y-auto p-5 space-y-3">
-          <div className="space-y-1.5">
-            <Label>Station Name</Label>
-            <Input
-              value={f.name}
-              onChange={(e) => setF({ ...f, name: e.target.value })}
-              placeholder="e.g. Kanpur Central"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label>Station Code (optional)</Label>
-            <Input
-              value={f.code}
-              onChange={(e) => setF({ ...f, code: e.target.value.toUpperCase() })}
-              placeholder="e.g. CNB"
-            />
-          </div>
-          {station && (
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="station-active"
-                checked={f.isActive}
-                onChange={(e) => setF({ ...f, isActive: e.target.checked })}
-              />
-              <Label htmlFor="station-active">Active (visible at checkout)</Label>
-            </div>
-          )}
-        </div>
-        <SheetFooter className="p-5 border-t flex-row gap-2 sm:justify-end">
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            className="flex-1 sm:flex-none"
-          >
-            Cancel
-          </Button>
-          <Button
-            className="flex-1 sm:flex-none"
-            onClick={() => {
-              if (!f.name) {
-                toast.error("Station name is required");
-                return;
-              }
-              onSave({ name: f.name, code: f.code || undefined, isActive: f.isActive });
             }}
           >
             Save

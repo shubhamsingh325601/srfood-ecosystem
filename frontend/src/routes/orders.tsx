@@ -63,7 +63,7 @@ function OrdersPage() {
                 </div>
                 <div className="mt-2 pt-2 border-t flex items-center justify-between text-sm">
                   <span>
-                    PNR {o.pnr} • {o.coach}/{o.seat} • {o.deliveryStation}
+                    {o.deliveryAddress.line}, {o.deliveryAddress.city}
                   </span>
                   <span className="font-bold">₹{paiseToRupees(o.grandTotal)}</span>
                 </div>

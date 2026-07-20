@@ -4,23 +4,31 @@ import { validateCartSchema } from '@/modules/cart/cart.dto';
 import { OrderStatus, PaymentMethod } from '@/types/domain.types';
 
 
+const SERVICEABLE_CITY = 'Kota';
+
+export const deliveryAddressSchema = z
+  .object({
+    line: z.string().trim().min(5, 'Address must be at least 5 characters').max(200),
+    landmark: z.string().trim().max(100).optional(),
+    city: z.string().trim().max(60).default(SERVICEABLE_CITY),
+    state: z.string().trim().max(60).default('Rajasthan'),
+    lat: z.number().optional(),
+    lng: z.number().optional(),
+  })
+  .refine((addr) => addr.city.toLowerCase() === SERVICEABLE_CITY.toLowerCase(), {
+    message: `We currently deliver only in ${SERVICEABLE_CITY}`,
+    path: ['city'],
+  });
+
 export const createOrderSchema = z.object({
   cart: validateCartSchema,
   paymentMethod: z.nativeEnum(PaymentMethod),
-  pnr: z
+  customerName: z.string().trim().min(2, 'Name required').max(80),
+  customerMobile: z
     .string()
     .trim()
-    .regex(/^\d{10}$/, 'PNR must be exactly 10 digits')
-    .optional(),
-  coach: z.string().trim().max(6).optional(),
-  seat: z.string().trim().max(4).optional(),
-  trainNumber: z
-    .string()
-    .trim()
-    .regex(/^\d{4,5}$/)
-    .optional(),
-  boardingStation: z.string().trim().max(60).optional(),
-  deliveryStation: z.string().trim().min(2).max(60),
+    .regex(/^[0-9+\-\s]{7,15}$/, 'Valid mobile number required'),
+  deliveryAddress: deliveryAddressSchema,
 });
 export type CreateOrderInput = z.infer<typeof createOrderSchema>;
 

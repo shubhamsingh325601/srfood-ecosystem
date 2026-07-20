@@ -5,18 +5,24 @@ export interface CreateOrderCartItem {
   specialNote?: string;
 }
 
+export interface DeliveryAddress {
+  line: string;
+  landmark?: string;
+  city: string;
+  state: string;
+  lat?: number;
+  lng?: number;
+}
+
 export interface CreateOrderPayload {
   cart: {
     items: CreateOrderCartItem[];
     couponCode?: string;
   };
   paymentMethod: "UPI" | "COD";
-  pnr?: string;
-  coach?: string;
-  seat?: string;
-  trainNumber?: string;
-  boardingStation?: string;
-  deliveryStation: string;
+  customerName: string;
+  customerMobile: string;
+  deliveryAddress: DeliveryAddress;
 }
 
 export interface UpiPaymentInfo {
@@ -36,10 +42,9 @@ export interface ApiOrder {
   grandTotal: number;
   createdAt: string;
   items: { menuItemId: string; name: string; price: number; quantity: number }[];
-  pnr?: string;
-  coach?: string;
-  seat?: string;
-  deliveryStation: string;
+  customerName: string;
+  customerMobile: string;
+  deliveryAddress: DeliveryAddress;
 }
 
 export interface CreateOrderResult {

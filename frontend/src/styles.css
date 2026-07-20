@@ -50,7 +50,7 @@
 
   --shadow-soft: 0 2px 12px -2px oklch(0 0 0 / 0.06);
   --shadow-card: 0 4px 20px -6px oklch(0 0 0 / 0.08);
-  --shadow-pop: 0 12px 40px -10px oklch(0.65 0.22 39 / 0.35);
+  --shadow-pop: 0 12px 40px -10px oklch(0.58 0.215 29 / 0.35);
 }
 
 :root {
@@ -62,37 +62,37 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.18 0.04 264);
 
-  /* Brand orange #FF6B00 */
-  --primary: oklch(0.685 0.215 41);
+  /* Brand red, matched to the Shree Radhe Food logo (#D40A0A) */
+  --primary: oklch(0.58 0.215 29);
   --primary-foreground: oklch(1 0 0);
-  --primary-soft: oklch(0.97 0.03 60);
+  --primary-soft: oklch(0.97 0.03 29);
 
   --secondary: oklch(0.97 0.01 240);
   --secondary-foreground: oklch(0.2 0.04 264);
   --muted: oklch(0.97 0.005 240);
   --muted-foreground: oklch(0.5 0.02 260);
-  --accent: oklch(0.97 0.03 60);
-  --accent-foreground: oklch(0.685 0.215 41);
-  --destructive: oklch(0.62 0.24 27);
+  --accent: oklch(0.97 0.03 29);
+  --accent-foreground: oklch(0.58 0.215 29);
+  --destructive: oklch(0.62 0.22 35);
   --destructive-foreground: oklch(1 0 0);
   --success: oklch(0.62 0.17 145);
   --warning: oklch(0.78 0.16 80);
 
   --border: oklch(0.93 0.008 250);
   --input: oklch(0.93 0.008 250);
-  --ring: oklch(0.685 0.215 41);
+  --ring: oklch(0.58 0.215 29);
 
   --navy: oklch(0.22 0.06 265);
-  --cream: oklch(0.98 0.02 70);
+  --cream: oklch(0.98 0.02 29);
 
   --sidebar: oklch(1 0 0);
   --sidebar-foreground: oklch(0.25 0.04 264);
-  --sidebar-primary: oklch(0.685 0.215 41);
+  --sidebar-primary: oklch(0.58 0.215 29);
   --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0.97 0.03 60);
-  --sidebar-accent-foreground: oklch(0.685 0.215 41);
+  --sidebar-accent: oklch(0.97 0.03 29);
+  --sidebar-accent-foreground: oklch(0.58 0.215 29);
   --sidebar-border: oklch(0.93 0.008 250);
-  --sidebar-ring: oklch(0.685 0.215 41);
+  --sidebar-ring: oklch(0.58 0.215 29);
 }
 
 .dark {
@@ -102,22 +102,22 @@
   --card-foreground: oklch(0.98 0.003 248);
   --popover: oklch(0.22 0.03 264);
   --popover-foreground: oklch(0.98 0.003 248);
-  --primary: oklch(0.7 0.21 41);
+  --primary: oklch(0.62 0.21 29);
   --primary-foreground: oklch(1 0 0);
-  --primary-soft: oklch(0.28 0.06 50);
+  --primary-soft: oklch(0.28 0.06 29);
   --secondary: oklch(0.28 0.03 260);
   --secondary-foreground: oklch(0.98 0.003 248);
   --muted: oklch(0.28 0.03 260);
   --muted-foreground: oklch(0.7 0.02 260);
-  --accent: oklch(0.28 0.06 50);
-  --accent-foreground: oklch(0.7 0.21 41);
+  --accent: oklch(0.28 0.06 29);
+  --accent-foreground: oklch(0.62 0.21 29);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.7 0.21 41);
+  --ring: oklch(0.62 0.21 29);
   --sidebar: oklch(0.22 0.03 264);
   --sidebar-foreground: oklch(0.98 0.003 248);
-  --sidebar-accent: oklch(0.28 0.06 50);
-  --sidebar-accent-foreground: oklch(0.7 0.21 41);
+  --sidebar-accent: oklch(0.28 0.06 29);
+  --sidebar-accent-foreground: oklch(0.62 0.21 29);
   --sidebar-border: oklch(1 0 0 / 10%);
 }
 

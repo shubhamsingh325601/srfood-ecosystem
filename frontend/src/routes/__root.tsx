@@ -67,26 +67,26 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "SRFOOD – Tasty Food, On Track" },
+      { title: "SRFOOD – Fresh Food Delivered in Kota" },
       {
         name: "description",
         content:
-          "Order hygienic, fresh meals delivered to your train seat. Safar ka saath, swaad ke saath.",
+          "Order hygienic, fresh meals delivered fast across Kota. Ghar jaisa khana, Kota mein.",
       },
-      { property: "og:title", content: "SRFOOD – Tasty Food, On Track" },
+      { property: "og:title", content: "SRFOOD – Fresh Food Delivered in Kota" },
       {
         property: "og:description",
         content:
-          "Order hygienic, fresh meals delivered to your train seat. Safar ka saath, swaad ke saath.",
+          "Order hygienic, fresh meals delivered fast across Kota. Ghar jaisa khana, Kota mein.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
 
-      { name: "twitter:title", content: "SRFOOD – Tasty Food, On Track" },
+      { name: "twitter:title", content: "SRFOOD – Fresh Food Delivered in Kota" },
       {
         name: "twitter:description",
         content:
-          "Order hygienic, fresh meals delivered to your train seat. Safar ka saath, swaad ke saath.",
+          "Order hygienic, fresh meals delivered fast across Kota. Ghar jaisa khana, Kota mein.",
       },
       {
         property: "og:image",

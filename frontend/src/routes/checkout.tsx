@@ -1,6 +1,5 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -10,32 +9,19 @@ import {
   CheckCircle2,
   MapPin,
   Loader2,
-  Check,
-  ChevronsUpDown,
   Copy,
   ArrowRight,
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { useCartStore, selectCartTotal } from "@/store/cartStore";
 import { useAuthStore } from "@/store/authStore";
-import { useDeliveryStore } from "@/store/deliveryStore";
 import { createOrder } from "@/features/orders/services/ordersApi";
 import { submitPaymentReference, declinePayment } from "@/features/payments/services/paymentsApi";
 import type { UpiPaymentInfo } from "@/features/orders/types";
-import { getStations } from "@/features/stations/services/stationsApi";
 import { getApiErrorMessage } from "@/lib/axios";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/label";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/checkout")({
@@ -45,18 +31,12 @@ export const Route = createFileRoute("/checkout")({
 
 const schema = z.object({
   name: z.string().trim().min(2, "Name required").max(80),
-  email: z.string().trim().email("Valid email required").max(200),
   phone: z
     .string()
     .trim()
     .regex(/^[0-9+\-\s]{7,15}$/, "Valid phone required"),
-  pnr: z
-    .string()
-    .trim()
-    .regex(/^[0-9]{10}$/, "10-digit PNR"),
-  coach: z.string().trim().min(1).max(6),
-  seat: z.string().trim().min(1).max(4),
-  station: z.string().trim().min(2).max(60),
+  address: z.string().trim().min(10, "Please enter a complete address"),
+  landmark: z.string().trim().max(100).optional(),
 });
 type Form = z.infer<typeof schema>;
 
@@ -66,7 +46,6 @@ function CheckoutPage() {
   const clearCart = useCartStore((s) => s.clear);
   const couponCode = useCartStore((s) => s.couponCode);
   const couponDiscountPaise = useCartStore((s) => s.couponDiscountPaise);
-  const deliveryTrainNumber = useDeliveryStore((s) => s.trainNumber);
   const currentUser = useAuthStore((s) => s.user);
   const nav = useNavigate();
   const [payment, setPayment] = useState<"UPI" | "COD">("UPI");
@@ -81,30 +60,22 @@ function CheckoutPage() {
   const [locating, setLocating] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [idempotencyKey] = useState(() => crypto.randomUUID());
-  const [stationOpen, setStationOpen] = useState(false);
-
-  const { data: stations } = useQuery({
-    queryKey: ["stations"],
-    queryFn: () => getStations(),
-  });
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
 
   const {
     register,
     handleSubmit,
     setValue,
-    watch,
     formState: { errors },
   } = useForm<Form>({
     resolver: zodResolver(schema),
     defaultValues: {
       name: currentUser?.name ?? "",
-      email: currentUser?.email ?? "",
       phone: currentUser?.mobile ?? "",
-      station: "",
+      address: "",
+      landmark: "",
     },
   });
-
-  const stationValue = watch("station");
 
   // After "Proceed to Pay" sends the browser to the UPI app, detect when the user comes back to
   // this tab and prompt them for what happened — there's no gateway callback to detect it for us.
@@ -133,27 +104,28 @@ function CheckoutPage() {
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         const { latitude, longitude } = pos.coords;
+        setCoords({ lat: latitude, lng: longitude });
         try {
           const res = await fetch(
             `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`,
           );
           const data = await res.json();
-          const place: string =
-            data.locality ||
-            data.city ||
-            data.principalSubdivision ||
-            `${latitude.toFixed(3)}, ${longitude.toFixed(3)}`;
-          const match = stations?.find((s) => s.name.toLowerCase().includes(place.toLowerCase()));
-          if (match) {
-            setValue("station", match.name, { shouldValidate: true });
-            toast.success(`Location detected: ${match.name}`);
+          const city: string = data.city || data.locality || data.principalSubdivision || "";
+          const formatted: string = [data.locality, data.city, data.principalSubdivision]
+            .filter(Boolean)
+            .filter((v, i, arr) => arr.indexOf(v) === i)
+            .join(", ");
+
+          if (formatted) {
+            setValue("address", formatted, { shouldValidate: true });
+          }
+          if (city && !city.toLowerCase().includes("kota")) {
+            toast.error("This location looks outside Kota — we currently deliver only within Kota, Rajasthan. Please double check your address.");
           } else {
-            toast.error(`No matching station found near "${place}" — please select one manually`);
-            setStationOpen(true);
+            toast.success("Location detected — please add your house/flat number and landmark.");
           }
         } catch {
-          toast.error("Could not detect a nearby station — please select one manually");
-          setStationOpen(true);
+          toast.error("Could not detect your address — please enter it manually");
         } finally {
           setLocating(false);
         }
@@ -208,11 +180,16 @@ function CheckoutPage() {
             couponCode: couponCode ?? undefined,
           },
           paymentMethod: payment,
-          pnr: data.pnr,
-          coach: data.coach,
-          seat: data.seat,
-          trainNumber: deliveryTrainNumber ?? undefined,
-          deliveryStation: data.station,
+          customerName: data.name,
+          customerMobile: data.phone,
+          deliveryAddress: {
+            line: data.address,
+            landmark: data.landmark || undefined,
+            city: "Kota",
+            state: "Rajasthan",
+            lat: coords?.lat,
+            lng: coords?.lng,
+          },
         },
         idempotencyKey,
       );
@@ -406,15 +383,12 @@ function CheckoutPage() {
             <Field label="Phone" error={errors.phone?.message}>
               <Input {...register("phone")} />
             </Field>
-            <Field label="Email" error={errors.email?.message} full>
-              <Input type="email" {...register("email")} />
-            </Field>
           </div>
         </section>
 
         <section className="bg-card border rounded-2xl p-5 space-y-4">
           <div className="flex items-center justify-between gap-3">
-            <h2 className="font-bold">Train Delivery Details</h2>
+            <h2 className="font-bold">Delivery Details</h2>
             <Button
               type="button"
               size="sm"
@@ -431,59 +405,16 @@ function CheckoutPage() {
               {locating ? "Detecting..." : "Use my location"}
             </Button>
           </div>
-          <div className="grid md:grid-cols-2 gap-3">
-            <Field label="PNR (10 digits)" error={errors.pnr?.message}>
-              <Input maxLength={10} {...register("pnr")} />
+          <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary bg-primary/10 rounded-full px-3 py-1">
+            <MapPin className="w-3.5 h-3.5" />
+            Delivering in Kota, Rajasthan
+          </div>
+          <div className="grid gap-3">
+            <Field label="Full Address (house/flat no., street, area)" error={errors.address?.message} full>
+              <Input placeholder="e.g. 12, Talwandi, Near City Mall" {...register("address")} />
             </Field>
-            <Field label="Station / Delivery Location" error={errors.station?.message}>
-              <Popover open={stationOpen} onOpenChange={setStationOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={stationOpen}
-                    className="w-full justify-between font-normal"
-                  >
-                    <span className={stationValue ? "" : "text-muted-foreground"}>
-                      {stationValue || "Select a station"}
-                    </span>
-                    <ChevronsUpDown className="w-4 h-4 opacity-50 shrink-0" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
-                  <Command>
-                    <CommandInput placeholder="Search stations..." />
-                    <CommandList>
-                      <CommandEmpty>No station found.</CommandEmpty>
-                      <CommandGroup>
-                        {(stations ?? []).map((s) => (
-                          <CommandItem
-                            key={s._id}
-                            value={s.name}
-                            onSelect={() => {
-                              setValue("station", s.name, { shouldValidate: true });
-                              setStationOpen(false);
-                            }}
-                          >
-                            <Check
-                              className={`mr-2 w-4 h-4 ${stationValue === s.name ? "opacity-100" : "opacity-0"}`}
-                            />
-                            {s.name}
-                            {s.code ? ` (${s.code})` : ""}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-            </Field>
-            <Field label="Coach" error={errors.coach?.message}>
-              <Input placeholder="e.g. B3" {...register("coach")} />
-            </Field>
-            <Field label="Seat" error={errors.seat?.message}>
-              <Input placeholder="e.g. 42" {...register("seat")} />
+            <Field label="Landmark (optional)" error={errors.landmark?.message} full>
+              <Input placeholder="e.g. Opposite City Mall" {...register("landmark")} />
             </Field>
           </div>
         </section>

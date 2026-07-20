@@ -26,17 +26,22 @@ export interface OrderStatusHistoryEntry {
   note?: string;
 }
 
+export interface OrderDeliveryAddress {
+  line: string;
+  landmark?: string;
+  city: string;
+  state: string;
+  lat?: number;
+  lng?: number;
+}
+
 export interface OrderDocument {
   _id: Types.ObjectId;
   orderId: string;
   passengerId: Types.ObjectId;
-  trainNumber?: string;
-  pnr?: string;
-  coach?: string;
-  seat?: string;
-  boardingStation?: string;
-  deliveryStation: string;
-  deliveryStationEta?: Date;
+  customerName: string;
+  customerMobile: string;
+  deliveryAddress: OrderDeliveryAddress;
   items: OrderItemSnapshot[];
   subtotal: number;
   deliveryFeePaise: number;
@@ -88,17 +93,25 @@ const statusHistorySchema = new Schema<OrderStatusHistoryEntry>(
   { _id: false },
 );
 
+const deliveryAddressSchema = new Schema<OrderDeliveryAddress>(
+  {
+    line: { type: String, required: true },
+    landmark: { type: String },
+    city: { type: String, required: true, default: 'Kota' },
+    state: { type: String, required: true, default: 'Rajasthan' },
+    lat: { type: Number },
+    lng: { type: Number },
+  },
+  { _id: false },
+);
+
 const orderSchema = new Schema<OrderDocument>(
   {
     orderId: { type: String, required: true, unique: true },
     passengerId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    trainNumber: { type: String },
-    pnr: { type: String },
-    coach: { type: String },
-    seat: { type: String },
-    boardingStation: { type: String },
-    deliveryStation: { type: String, required: true },
-    deliveryStationEta: { type: Date },
+    customerName: { type: String, required: true },
+    customerMobile: { type: String, required: true },
+    deliveryAddress: { type: deliveryAddressSchema, required: true },
     items: { type: [orderItemSchema], required: true, validate: (v: unknown[]) => v.length > 0 },
     subtotal: { type: Number, required: true },
     deliveryFeePaise: { type: Number, required: true, default: 0 },

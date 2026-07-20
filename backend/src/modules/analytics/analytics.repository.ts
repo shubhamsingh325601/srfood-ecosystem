@@ -23,10 +23,10 @@ export const analyticsRepository = {
     ]);
   },
 
-  async stationHeatmap(from?: Date, to?: Date) {
+  async areaHeatmap(from?: Date, to?: Date) {
     return Order.aggregate([
       { $match: { isDeleted: false, ...dateFilter(from, to) } },
-      { $group: { _id: '$deliveryStation', orderCount: { $sum: 1 } } },
+      { $group: { _id: { $ifNull: ['$deliveryAddress.landmark', '$deliveryAddress.city'] }, orderCount: { $sum: 1 } } },
       { $sort: { orderCount: -1 } },
       { $limit: 20 },
     ]);

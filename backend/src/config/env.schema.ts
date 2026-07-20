@@ -22,9 +22,6 @@ const envSchema = z.object({
   SENDGRID_API_KEY: z.string().optional().default(''),
   SENDGRID_FROM_EMAIL: z.string().optional().default('no-reply@srfood.example'),
 
-  RAIL_API_BASE_URL: z.string().optional().default(''),
-  RAIL_API_KEY: z.string().optional().default(''),
-
   CORS_ALLOWED_ORIGINS: z.string().default('http://localhost:3000'),
 
   RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(60_000),

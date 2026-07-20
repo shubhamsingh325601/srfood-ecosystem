@@ -14,14 +14,10 @@ export const PRICING = {
   RE_AUTH_THRESHOLD_PAISE: 1000000,
 } as const;
 
-export const DELIVERY_WINDOW_MINUTES = 45;
-
 export const AUTH_LOCKOUT = {
   MAX_FAILED_ATTEMPTS: 5,
   COOLDOWN_MINUTES: 30,
 } as const;
-
-export const TRAIN_SCHEDULE_CACHE_TTL_HOURS = 24;
 
 export const RATING = {
   POST_DELIVERY_DELAY_MINUTES: 15,

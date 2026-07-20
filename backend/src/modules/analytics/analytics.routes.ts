@@ -56,9 +56,9 @@ analyticsRoutes.get('/revenue', requireAuth, requireRole(...adminRoles), validat
 
 /**
  * @openapi
- * /admin/analytics/stations:
+ * /admin/analytics/areas:
  *   get:
- *     summary: Order volume by delivery station
+ *     summary: Order volume by delivery area/landmark
  *     tags: [Analytics]
  *     security: [{ bearerAuth: [] }]
  *     parameters:
@@ -66,14 +66,14 @@ analyticsRoutes.get('/revenue', requireAuth, requireRole(...adminRoles), validat
  *       - { in: query, name: to, schema: { type: string, format: date-time } }
  *     responses:
  *       '200':
- *         description: OK — top 20 stations by order count
+ *         description: OK — top 20 areas by order count
  *         content:
  *           application/json:
- *             schema: { $ref: '#/components/schemas/AnalyticsStationsResponse' }
+ *             schema: { $ref: '#/components/schemas/AnalyticsAreasResponse' }
  *       '401': { $ref: '#/components/responses/Unauthorized' }
  *       '403': { $ref: '#/components/responses/Forbidden' }
  */
-analyticsRoutes.get('/stations', requireAuth, requireRole(...adminRoles), validate({ query: dateRangeSchema }), analyticsController.stationHeatmap);
+analyticsRoutes.get('/areas', requireAuth, requireRole(...adminRoles), validate({ query: dateRangeSchema }), analyticsController.areaHeatmap);
 
 /**
  * @openapi

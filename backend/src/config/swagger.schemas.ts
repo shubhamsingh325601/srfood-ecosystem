@@ -211,13 +211,9 @@ const Order: Schema = {
     _id: objectId(),
     orderId: { type: 'string', example: 'SRF-20260714-00042' },
     passengerId: objectId(),
-    trainNumber: { type: 'string', nullable: true, example: '12345' },
-    pnr: { type: 'string', nullable: true, example: '1234567890' },
-    coach: { type: 'string', nullable: true, example: 'B4' },
-    seat: { type: 'string', nullable: true, example: '32' },
-    boardingStation: { type: 'string', nullable: true },
-    deliveryStation: { type: 'string', example: 'NDLS' },
-    deliveryStationEta: dateTime(),
+    customerName: { type: 'string', example: 'Rahul Sharma' },
+    customerMobile: { type: 'string', example: '9876543210' },
+    deliveryAddress: { $ref: '#/components/schemas/DeliveryAddress' },
     items: { type: 'array', items: OrderItemSnapshot },
     subtotal: paise(),
     deliveryFeePaise: paise(),
@@ -359,66 +355,15 @@ const Notification: Schema = {
   },
 };
 
-const Station: Schema = {
+const DeliveryAddress: Schema = {
   type: 'object',
   properties: {
-    _id: objectId(),
-    name: { type: 'string', example: 'New Delhi' },
-    code: { type: 'string', nullable: true, example: 'NDLS' },
-    isActive: { type: 'boolean' },
-    createdAt: dateTime(),
-    updatedAt: dateTime(),
-  },
-};
-
-const TrainStop: Schema = {
-  type: 'object',
-  properties: {
-    stationCode: { type: 'string', example: 'NDLS' },
-    stationName: { type: 'string', example: 'New Delhi' },
-    arrivalTime: { type: 'string', nullable: true, example: '14:35' },
-    departureTime: { type: 'string', nullable: true, example: '14:40' },
-    dayOffset: { type: 'integer', example: 0 },
-    distanceKm: { type: 'number', nullable: true },
-  },
-};
-
-const TrainSchedule: Schema = {
-  type: 'object',
-  properties: {
-    trainNumber: { type: 'string', example: '12345' },
-    trainName: { type: 'string', example: 'Rajdhani Express' },
-    sourceStationCode: { type: 'string' },
-    destinationStationCode: { type: 'string' },
-    runsOnDays: { type: 'array', items: { type: 'string' } },
-    stops: { type: 'array', items: TrainStop },
-    fetchedAt: dateTime(),
-    expiresAt: dateTime(),
-  },
-};
-
-const TrainSearchResult: Schema = {
-  type: 'object',
-  properties: {
-    trainNumber: { type: 'string', example: '12345' },
-    trainName: { type: 'string', example: 'Rajdhani Express' },
-    sourceStationCode: { type: 'string' },
-    destinationStationCode: { type: 'string' },
-  },
-};
-
-const PnrStatus: Schema = {
-  type: 'object',
-  properties: {
-    pnr: { type: 'string', example: '1234567890' },
-    trainNumber: { type: 'string' },
-    trainName: { type: 'string' },
-    boardingDate: { type: 'string', example: '2026-07-14' },
-    boardingStationCode: { type: 'string' },
-    reservationUpToStationCode: { type: 'string' },
-    coach: { type: 'string' },
-    seat: { type: 'string' },
-    chartPrepared: { type: 'boolean' },
+    line: { type: 'string', example: '123 Talwandi, Near City Mall' },
+    landmark: { type: 'string', nullable: true, example: 'Opposite City Mall' },
+    city: { type: 'string', example: 'Kota' },
+    state: { type: 'string', example: 'Rajasthan' },
+    lat: { type: 'number', nullable: true },
+    lng: { type: 'number', nullable: true },
   },
 };
 
@@ -647,11 +592,7 @@ export const schemas: Record<string, Schema> = {
   Rating,
   SupportTicket,
   Notification,
-  Station,
-  TrainSchedule,
-  TrainStop,
-  TrainSearchResult,
-  PnrStatus,
+  DeliveryAddress,
   Invoice,
   Payment,
   UpiPaymentInit,
@@ -715,13 +656,6 @@ export const schemas: Record<string, Schema> = {
   SupportTicketResponse: success(ref('SupportTicket')),
   SupportTicketListResponse: paginated(ref('SupportTicket')),
 
-  TrainSearchResponse: successArray(ref('TrainSearchResult')),
-  PnrStatusResponse: success(ref('PnrStatus')),
-  TrainScheduleResponse: success(ref('TrainSchedule')),
-
-  StationResponse: success(ref('Station')),
-  StationListResponse: successArray(ref('Station')),
-
   InvoiceResponse: success(ref('Invoice')),
 
   NotificationResponse: success(ref('Notification')),
@@ -766,9 +700,9 @@ export const schemas: Record<string, Schema> = {
     type: 'object',
     properties: { _id: { type: 'string', description: 'Date (YYYY-MM-DD)' }, revenuePaise: paise(), orderCount: { type: 'integer' } },
   }),
-  AnalyticsStationsResponse: successArray({
+  AnalyticsAreasResponse: successArray({
     type: 'object',
-    properties: { _id: { type: 'string', description: 'Delivery station name' }, orderCount: { type: 'integer' } },
+    properties: { _id: { type: 'string', description: 'Delivery landmark/area' }, orderCount: { type: 'integer' } },
   }),
   AnalyticsPaymentsResponse: successArray({
     type: 'object',

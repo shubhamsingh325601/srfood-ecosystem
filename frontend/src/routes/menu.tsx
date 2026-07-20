@@ -84,7 +84,7 @@ function MenuPage() {
         <div>
           <h1 className="text-3xl font-bold">Menu</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Fresh, hygienic meals — delivered to your seat.
+            Fresh, hygienic meals — delivered across Kota.
           </p>
         </div>
 

@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { LogOut, Mail, Phone, ShieldCheck, User } from "lucide-react";
+import { LogOut, Phone, ShieldCheck, User } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/Button";
 import { logoutRequest } from "@/features/auth/services/authApi";
@@ -36,7 +36,6 @@ function ProfilePage() {
 
   const rows = [
     { icon: User, label: "Name", value: currentUser.name },
-    ...(currentUser.email ? [{ icon: Mail, label: "Email", value: currentUser.email }] : []),
     { icon: Phone, label: "Mobile", value: currentUser.mobile },
     { icon: ShieldCheck, label: "Role", value: currentUser.role },
   ];

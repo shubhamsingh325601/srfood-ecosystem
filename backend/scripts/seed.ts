@@ -6,7 +6,6 @@ import { Category } from '@/models/Category.model';
 import { CmsContent } from '@/models/CmsContent.model';
 import { Coupon } from '@/models/Coupon.model';
 import { MenuItem } from '@/models/MenuItem.model';
-import { Station } from '@/models/Station.model';
 import { User } from '@/models/User.model';
 import { uploadImageBuffer } from '@/services/cloudinary.service';
 import { CmsContentType, CouponDiscountType, UserRole } from '@/types/domain.types';
@@ -155,24 +154,6 @@ const MENU_ITEM_SEEDS: MenuItemSeed[] = [
   },
 ];
 
-interface StationSeed {
-  name: string;
-  code: string;
-}
-
-const STATION_SEEDS: StationSeed[] = [
-  { name: 'New Delhi', code: 'NDLS' },
-  { name: 'Mumbai Central', code: 'BCT' },
-  { name: 'Bhopal Junction', code: 'BPL' },
-  { name: 'Kanpur Central', code: 'CNB' },
-  { name: 'Lucknow', code: 'LKO' },
-  { name: 'Chennai Central', code: 'MAS' },
-  { name: 'Howrah Junction', code: 'HWH' },
-  { name: 'Bengaluru City', code: 'SBC' },
-  { name: 'Ahmedabad Junction', code: 'ADI' },
-  { name: 'Jaipur Junction', code: 'JP' },
-];
-
 async function seedCategories(): Promise<Map<string, string>> {
   const slugToId = new Map<string, string>();
   for (const seed of CATEGORY_SEEDS) {
@@ -215,17 +196,6 @@ async function seedMenuItems(categoryIdBySlug: Map<string, string>): Promise<voi
   }
 }
 
-async function seedStations(): Promise<void> {
-  for (const seed of STATION_SEEDS) {
-    await Station.findOneAndUpdate(
-      { code: seed.code },
-      { name: seed.name, code: seed.code, isActive: true },
-      { upsert: true, new: true },
-    );
-    logger.info(`Station seeded: ${seed.name}`);
-  }
-}
-
 async function seedCoupons(): Promise<void> {
   const oneYearFromNow = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
   const coupons = [
@@ -238,7 +208,7 @@ async function seedCoupons(): Promise<void> {
       usageLimitPerUser: 1,
     },
     {
-      code: 'TRAIN20',
+      code: 'WEEKEND20',
       description: 'Weekend Special on orders above ₹399',
       discountType: CouponDiscountType.PERCENTAGE,
       discountValue: 20,
@@ -280,19 +250,19 @@ async function seedCmsContent(): Promise<void> {
       type: CmsContentType.HOMEPAGE,
       data: {
         hero: [
-          { eyebrow: 'Tasty Food,', title: 'On Track!', desc: 'Delicious meals delivered to your seat. Hygienic. Fresh. On Time.', cta: 'Order Now' },
-          { eyebrow: 'Fresh Thalis,', title: 'Every Journey!', desc: 'Regional flavors, packed hot and delivered station-side.', cta: 'Explore Menu' },
-          { eyebrow: 'Hygienic Kitchens,', title: 'Honest Pricing!', desc: 'FSSAI-certified partners. Live tracking till your seat.', cta: 'See Offers' },
+          { eyebrow: 'Tasty Food,', title: 'Delivered Fast!', desc: 'Delicious meals delivered to your doorstep across Kota. Hygienic. Fresh. On Time.', cta: 'Order Now' },
+          { eyebrow: 'Fresh Thalis,', title: 'Ghar Jaisa Khana!', desc: 'Regional flavors, packed hot and delivered across the city.', cta: 'Explore Menu' },
+          { eyebrow: 'Hygienic Kitchens,', title: 'Honest Pricing!', desc: 'FSSAI-certified partners. Live tracking till your doorstep.', cta: 'See Offers' },
         ],
-        offer: { code: 'SRFOOD10', percent: 10, headline: 'On Your First Order', sub: 'Fast Delivery Right to Your Seat' },
+        offer: { code: 'SRFOOD10', percent: 10, headline: 'On Your First Order', sub: 'Fast Delivery Across Kota' },
       },
     },
     {
       type: CmsContentType.FAQ,
       data: {
         faqs: [
-          { question: 'How do I place an order?', answer: 'Browse the menu, add items to your cart, then enter your PNR, coach and seat number at checkout.', displayOrder: 1 },
-          { question: 'How is food delivered on train?', answer: 'Our kitchen near your upcoming station prepares food and hands it over at the platform to your seat.', displayOrder: 2 },
+          { question: 'How do I place an order?', answer: 'Browse the menu, add items to your cart, then enter your name, mobile number and delivery address at checkout.', displayOrder: 1 },
+          { question: 'Where do you deliver?', answer: 'We currently deliver only within Kota, Rajasthan. Use "Use my location" at checkout for a quick, accurate address.', displayOrder: 2 },
           { question: 'Can I cancel an order?', answer: 'Orders can be cancelled before they enter the Preparing stage. Contact support for assistance.', displayOrder: 3 },
           { question: 'What are the payment options?', answer: 'We accept UPI, Cards, Wallets and Cash on Delivery.', displayOrder: 4 },
           { question: 'Is the food hygienic?', answer: 'Our kitchen is FSSAI-certified and follows strict hygiene protocols.', displayOrder: 5 },
@@ -302,13 +272,13 @@ async function seedCmsContent(): Promise<void> {
     {
       type: CmsContentType.LEGAL_PRIVACY,
       data: {
-        text: 'SR Food respects your privacy. We collect the minimum information necessary to deliver your order — name, contact, PNR/seat details, and payment confirmation. We do not sell your data. Payment details are handled by secure PCI-DSS compliant gateways. You may request deletion of your account at any time from your profile.',
+        text: 'SR Food respects your privacy. We collect the minimum information necessary to deliver your order — name, contact number, delivery address, and payment confirmation. We do not sell your data. Payment details are handled by secure PCI-DSS compliant gateways. You may request deletion of your account at any time from your profile.',
       },
     },
     {
       type: CmsContentType.LEGAL_TERMS,
       data: {
-        text: 'By using SR Food you agree to place genuine orders with accurate PNR/seat details. Refunds are issued for undelivered or unsatisfactory orders as per our refund policy. Prices are inclusive of applicable taxes unless stated otherwise.',
+        text: 'By using SR Food you agree to place genuine orders with an accurate delivery address within Kota. Refunds are issued for undelivered or unsatisfactory orders as per our refund policy. Prices are inclusive of applicable taxes unless stated otherwise.',
       },
     },
     {
@@ -322,7 +292,7 @@ async function seedCmsContent(): Promise<void> {
         },
         contactEmail: 'support@srfood.example',
         contactPhone: '+91 98765 43210',
-        contactAddress: 'SR Food HQ, Sector 21, New Delhi, India',
+        contactAddress: 'SR Food HQ, Talwandi, Kota, Rajasthan, India',
         whatsappNumber: '+91 6378639934',
         upiVpa: '6378639934-3@ybl',
         upiPayeeName: 'SR Food',
@@ -365,7 +335,6 @@ async function main(): Promise<void> {
     await seedSuperAdmin();
     const categoryIdBySlug = await seedCategories();
     await seedMenuItems(categoryIdBySlug);
-    await seedStations();
     await seedCoupons();
     await seedCmsContent();
     logger.info('Seed complete.');

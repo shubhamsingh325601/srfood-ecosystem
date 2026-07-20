@@ -33,7 +33,7 @@ export function Footer() {
         <div>
           <Logo />
           <p className="text-sm text-muted-foreground mt-3 max-w-xs">
-            Safar ka saath, Swaad ke saath. Hygienic, fresh meals delivered to your train seat.
+            Ghar jaisa khana, Kota mein. Hygienic, fresh meals delivered fast across the city.
           </p>
         </div>
         <div>

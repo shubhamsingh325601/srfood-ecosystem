@@ -36,10 +36,6 @@ export const config = {
     apiKey: env.SENDGRID_API_KEY,
     fromEmail: env.SENDGRID_FROM_EMAIL,
   },
-  railApi: {
-    baseUrl: env.RAIL_API_BASE_URL,
-    apiKey: env.RAIL_API_KEY,
-  },
   cors: {
     allowedOrigins: env.CORS_ALLOWED_ORIGINS.split(',').map((o) => o.trim()),
   },
