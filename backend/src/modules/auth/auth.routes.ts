@@ -26,7 +26,7 @@ export const authRoutes = Router();
  *             properties:
  *               name: { type: string, minLength: 2, maxLength: 80, example: 'Asha Verma' }
  *               mobile: { type: string, pattern: '^[6-9]\d{9}$', example: '9876543210', description: '10-digit Indian mobile number — the only login identifier' }
- *               password: { type: string, minLength: 8, maxLength: 72, example: 'Passw0rd!', description: 'Must contain at least one letter and one number' }
+ *               password: { type: string, minLength: 1, maxLength: 72, example: 'mypassword' }
  *     responses:
  *       '201':
  *         description: Registered — tokens issued immediately

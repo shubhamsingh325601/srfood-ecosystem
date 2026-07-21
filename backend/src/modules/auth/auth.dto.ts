@@ -4,10 +4,8 @@ const MOBILE_REGEX = /^[6-9]\d{9}$/;
 
 const passwordSchema = z
   .string()
-  .min(8, 'Password must be at least 8 characters')
-  .max(72, 'Password must be at most 72 characters')
-  .regex(/[a-zA-Z]/, 'Password must contain a letter')
-  .regex(/[0-9]/, 'Password must contain a number');
+  .min(1, 'Password is required')
+  .max(72, 'Password must be at most 72 characters');
 
 export const registerSchema = z.object({
   name: z.string().trim().min(2).max(80),

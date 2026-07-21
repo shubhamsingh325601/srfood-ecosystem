@@ -98,7 +98,7 @@ function LoginForm() {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
       <div className="space-y-1.5">
         <Label>Mobile Number</Label>
-        <Input inputMode="numeric" maxLength={10} placeholder="9876543210" {...field("mobile")} />
+        <Input inputMode="numeric" maxLength={10} {...field("mobile")} />
         {errors.mobile && <p className="text-xs text-destructive">{errors.mobile.message}</p>}
       </div>
       <div className="space-y-1.5">
@@ -142,7 +142,7 @@ function SignupForm() {
       </div>
       <div className="space-y-1.5">
         <Label>Mobile Number</Label>
-        <Input inputMode="numeric" maxLength={10} placeholder="9876543210" {...field("mobile")} />
+        <Input inputMode="numeric" maxLength={10} {...field("mobile")} />
         {errors.mobile && <p className="text-xs text-destructive">{errors.mobile.message}</p>}
       </div>
       <div className="space-y-1.5">

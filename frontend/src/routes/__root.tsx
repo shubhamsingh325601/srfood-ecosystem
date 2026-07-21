@@ -15,6 +15,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Header } from "@/components/layout/Header";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { Footer } from "@/components/layout/Footer";
+import { FloatingCartBar } from "@/components/layout/FloatingCartBar";
 import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
@@ -147,6 +148,7 @@ function RootComponent() {
           </main>
         </div>
         {!isAdmin && <Footer />}
+        {!isAdmin && <FloatingCartBar />}
         <Toaster />
       </div>
     </QueryClientProvider>

@@ -5,11 +5,7 @@ const mobileSchema = z
   .trim()
   .regex(/^[6-9]\d{9}$/, "Enter a valid 10-digit mobile number");
 
-const passwordRulesSchema = z
-  .string()
-  .min(8, "At least 8 characters")
-  .regex(/[a-zA-Z]/, "Must contain a letter")
-  .regex(/[0-9]/, "Must contain a number");
+const passwordRulesSchema = z.string().min(1, "Password is required");
 
 export const loginSchema = z.object({
   mobile: mobileSchema,

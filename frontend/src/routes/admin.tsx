@@ -50,6 +50,7 @@ import {
   Bell,
   Eye,
   EyeOff,
+  Tag,
 } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -85,6 +86,14 @@ import {
 import { paiseToRupees } from "@/features/menu/mappers";
 import type { ApiCategory, ApiMenuItem } from "@/features/menu/types";
 import { listAdminRatings, moderateRating } from "@/features/ratings/services/ratingsApi";
+import {
+  listAllCoupons,
+  createCoupon,
+  updateCoupon,
+  deleteCoupon,
+  type AdminCoupon,
+  type CouponPayload,
+} from "@/features/coupons/services/couponsApi";
 import {
   getHomepage,
   updateHomepage,
@@ -183,6 +192,10 @@ function AdminPage() {
               <Layers className="w-4 h-4" />
               Categories
             </TabsTrigger>
+            <TabsTrigger value="offers" className="gap-1.5">
+              <Tag className="w-4 h-4" />
+              Offers
+            </TabsTrigger>
             <TabsTrigger value="orders" className="gap-1.5">
               <Package className="w-4 h-4" />
               Orders
@@ -208,6 +221,9 @@ function AdminPage() {
           </TabsContent>
           <TabsContent value="categories">
             <CategoriesAdmin />
+          </TabsContent>
+          <TabsContent value="offers">
+            <OffersAdmin />
           </TabsContent>
           <TabsContent value="orders">
             <OrdersAdmin />
@@ -279,7 +295,7 @@ function AdminLoginForm() {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-3 text-left">
       <div className="space-y-1.5">
         <Label>Mobile Number</Label>
-        <Input inputMode="numeric" maxLength={10} placeholder="9876543210" {...field("mobile")} />
+        <Input inputMode="numeric" maxLength={10} {...field("mobile")} />
         {errors.mobile && <p className="text-xs text-destructive">{errors.mobile.message}</p>}
       </div>
       <div className="space-y-1.5">
@@ -978,6 +994,358 @@ function CategoryPanel({
                 icon: f.icon || undefined,
                 imageUrl: f.imageUrl || undefined,
                 displayOrder: f.displayOrder,
+              });
+            }}
+          >
+            Save
+          </Button>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
+  );
+}
+
+function OffersAdmin() {
+  const queryClient = useQueryClient();
+  const { data, isLoading } = useQuery({
+    queryKey: ["admin-coupons"],
+    queryFn: listAllCoupons,
+  });
+  const coupons = data ?? [];
+
+  const [editing, setEditing] = useState<AdminCoupon | null>(null);
+  const [open, setOpen] = useState(false);
+  const [confirmDel, setConfirmDel] = useState<AdminCoupon | null>(null);
+
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: ["admin-coupons"] });
+
+  const saveMutation = useMutation({
+    mutationFn: (payload: CouponPayload) =>
+      editing ? updateCoupon(editing._id, payload) : createCoupon(payload),
+    onSuccess: () => {
+      invalidate();
+      toast.success("Saved");
+      setOpen(false);
+    },
+    onError: (e) => toast.error(getApiErrorMessage(e)),
+  });
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteCoupon(id),
+    onSuccess: () => {
+      invalidate();
+      toast.success("Deleted");
+    },
+    onError: (e) => toast.error(getApiErrorMessage(e)),
+  });
+  const toggleActiveMutation = useMutation({
+    mutationFn: (c: AdminCoupon) => updateCoupon(c._id, { isActive: !c.isActive }),
+    onSuccess: () => {
+      invalidate();
+      toast.success("Updated");
+    },
+    onError: (e) => toast.error(getApiErrorMessage(e)),
+  });
+
+  if (isLoading) return <p className="text-sm text-muted-foreground py-10 text-center">Loading…</p>;
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="font-bold text-lg">Offers & Coupons ({coupons.length})</h2>
+        <Button
+          onClick={() => {
+            setEditing(null);
+            setOpen(true);
+          }}
+        >
+          <Plus className="w-4 h-4 mr-1" />
+          Add Offer
+        </Button>
+      </div>
+      <p className="text-sm text-muted-foreground">
+        Active offers appear automatically on the homepage banner and the Offers page.
+      </p>
+      <div className="bg-card border rounded-2xl overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Code</TableHead>
+              <TableHead>Discount</TableHead>
+              <TableHead>Min Order</TableHead>
+              <TableHead>Valid Until</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {coupons.map((c) => (
+              <TableRow key={c._id}>
+                <TableCell>
+                  <div className="font-mono font-bold text-sm">{c.code}</div>
+                  <div className="text-xs text-muted-foreground max-w-[220px] truncate">
+                    {c.description}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  {c.discountType === "FLAT"
+                    ? `₹${paiseToRupees(c.discountValue)} OFF`
+                    : `${c.discountValue}% OFF`}
+                </TableCell>
+                <TableCell>₹{paiseToRupees(c.minOrderValuePaise)}</TableCell>
+                <TableCell className="text-xs text-muted-foreground">
+                  {new Date(c.validUntil).toLocaleDateString()}
+                </TableCell>
+                <TableCell>
+                  <button
+                    onClick={() => toggleActiveMutation.mutate(c)}
+                    className={`text-xs font-semibold ${c.isActive ? "text-green-600" : "text-muted-foreground"}`}
+                  >
+                    {c.isActive ? "Active" : "Inactive"}
+                  </button>
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex gap-1 justify-end">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => {
+                        setEditing(c);
+                        setOpen(true);
+                      }}
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </Button>
+                    <Button size="icon" variant="ghost" onClick={() => setConfirmDel(c)}>
+                      <Trash2 className="w-4 h-4 text-destructive" />
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+        {!coupons.length && (
+          <p className="text-sm text-muted-foreground text-center py-8">No offers yet.</p>
+        )}
+      </div>
+      <OfferPanel
+        open={open}
+        onOpenChange={setOpen}
+        coupon={editing}
+        onSave={(payload) => saveMutation.mutate(payload)}
+      />
+      <ConfirmDialog
+        open={!!confirmDel}
+        title="Delete offer?"
+        description={confirmDel ? `"${confirmDel.code}" will be permanently removed.` : ""}
+        confirmLabel="Delete"
+        destructive
+        onCancel={() => setConfirmDel(null)}
+        onConfirm={() => {
+          if (confirmDel) deleteMutation.mutate(confirmDel._id);
+          setConfirmDel(null);
+        }}
+      />
+    </div>
+  );
+}
+
+interface OfferDraft {
+  code: string;
+  description: string;
+  discountType: "PERCENTAGE" | "FLAT";
+  discountValue: number;
+  maxDiscountRupees: number;
+  minOrderValueRupees: number;
+  validFrom: string;
+  validUntil: string;
+  usageLimitPerUser: number;
+  isActive: boolean;
+}
+
+function toDateInput(iso?: string): string {
+  return iso ? new Date(iso).toISOString().slice(0, 10) : "";
+}
+
+function OfferPanel({
+  open,
+  onOpenChange,
+  coupon,
+  onSave,
+}: {
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  coupon: AdminCoupon | null;
+  onSave: (payload: CouponPayload) => void;
+}) {
+  const inOneYear = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const empty: OfferDraft = {
+    code: "",
+    description: "",
+    discountType: "PERCENTAGE",
+    discountValue: 10,
+    maxDiscountRupees: 0,
+    minOrderValueRupees: 0,
+    validFrom: new Date().toISOString().slice(0, 10),
+    validUntil: inOneYear,
+    usageLimitPerUser: 1,
+    isActive: true,
+  };
+  const toDraft = (c: AdminCoupon | null): OfferDraft =>
+    c
+      ? {
+          code: c.code,
+          description: c.description,
+          discountType: c.discountType,
+          discountValue: c.discountValue,
+          maxDiscountRupees: c.maxDiscountPaise ? paiseToRupees(c.maxDiscountPaise) : 0,
+          minOrderValueRupees: paiseToRupees(c.minOrderValuePaise),
+          validFrom: toDateInput(c.validFrom),
+          validUntil: toDateInput(c.validUntil),
+          usageLimitPerUser: c.usageLimitPerUser,
+          isActive: c.isActive,
+        }
+      : empty;
+  const [f, setF] = useState<OfferDraft>(toDraft(coupon));
+
+  useEffect(() => {
+    if (open) setF(toDraft(coupon));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, coupon]);
+
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="right" className="w-[380px] sm:max-w-[380px] flex flex-col p-0">
+        <SheetHeader className="p-5 border-b">
+          <SheetTitle>{coupon ? "Edit Offer" : "Add Offer"}</SheetTitle>
+        </SheetHeader>
+        <div className="flex-1 overflow-y-auto p-5 space-y-3">
+          <div className="space-y-1.5">
+            <Label>Code</Label>
+            <Input
+              value={f.code}
+              onChange={(e) => setF({ ...f, code: e.target.value.toUpperCase() })}
+              placeholder="e.g. FLAT50"
+              className="font-mono"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Description</Label>
+            <Textarea
+              value={f.description}
+              onChange={(e) => setF({ ...f, description: e.target.value })}
+              placeholder="e.g. Buy 1 Get 1 Free on all thalis"
+              rows={2}
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label>Discount Type</Label>
+              <Select
+                value={f.discountType}
+                onValueChange={(v) => setF({ ...f, discountType: v as "PERCENTAGE" | "FLAT" })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="PERCENTAGE">Percentage</SelectItem>
+                  <SelectItem value="FLAT">Flat Amount</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label>{f.discountType === "PERCENTAGE" ? "Percent Off" : "Amount Off (₹)"}</Label>
+              <Input
+                type="number"
+                value={f.discountValue}
+                onChange={(e) => setF({ ...f, discountValue: Number(e.target.value) })}
+              />
+            </div>
+          </div>
+          {f.discountType === "PERCENTAGE" && (
+            <div className="space-y-1.5">
+              <Label>Max Discount (₹, optional)</Label>
+              <Input
+                type="number"
+                value={f.maxDiscountRupees}
+                onChange={(e) => setF({ ...f, maxDiscountRupees: Number(e.target.value) })}
+                placeholder="No cap"
+              />
+            </div>
+          )}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label>Min Order (₹)</Label>
+              <Input
+                type="number"
+                value={f.minOrderValueRupees}
+                onChange={(e) => setF({ ...f, minOrderValueRupees: Number(e.target.value) })}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Uses Per User</Label>
+              <Input
+                type="number"
+                value={f.usageLimitPerUser}
+                onChange={(e) => setF({ ...f, usageLimitPerUser: Number(e.target.value) })}
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label>Valid From</Label>
+              <Input
+                type="date"
+                value={f.validFrom}
+                onChange={(e) => setF({ ...f, validFrom: e.target.value })}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Valid Until</Label>
+              <Input
+                type="date"
+                value={f.validUntil}
+                onChange={(e) => setF({ ...f, validUntil: e.target.value })}
+              />
+            </div>
+          </div>
+          <label className="flex items-center gap-2 pt-1 text-sm font-medium cursor-pointer">
+            <input
+              type="checkbox"
+              checked={f.isActive}
+              onChange={(e) => setF({ ...f, isActive: e.target.checked })}
+              className="w-4 h-4 accent-primary"
+            />
+            Active (visible to customers)
+          </label>
+        </div>
+        <SheetFooter className="p-5 border-t flex-row gap-2 sm:justify-end">
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            className="flex-1 sm:flex-none"
+          >
+            Cancel
+          </Button>
+          <Button
+            className="flex-1 sm:flex-none"
+            onClick={() => {
+              if (!f.code || !f.description) {
+                toast.error("Code and description are required");
+                return;
+              }
+              onSave({
+                code: f.code,
+                description: f.description,
+                discountType: f.discountType,
+                discountValue: f.discountValue,
+                maxDiscountPaise: f.maxDiscountRupees > 0 ? Math.round(f.maxDiscountRupees * 100) : undefined,
+                minOrderValuePaise: Math.round(f.minOrderValueRupees * 100),
+                validFrom: new Date(f.validFrom).toISOString(),
+                validUntil: new Date(f.validUntil).toISOString(),
+                usageLimitPerUser: f.usageLimitPerUser,
+                isActive: f.isActive,
               });
             }}
           >

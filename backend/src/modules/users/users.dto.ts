@@ -1,11 +1,6 @@
 import { z } from 'zod';
 
-const passwordSchema = z
-  .string()
-  .min(8)
-  .max(72)
-  .regex(/[a-zA-Z]/)
-  .regex(/[0-9]/);
+const passwordSchema = z.string().min(1).max(72);
 
 export const updateProfileSchema = z.object({
   name: z.string().trim().min(2).max(80).optional(),

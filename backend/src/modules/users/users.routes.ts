@@ -86,7 +86,7 @@ usersRoutes.patch('/me', requireAuth, validate({ body: updateProfileSchema }), u
  *             required: [currentPassword, newPassword]
  *             properties:
  *               currentPassword: { type: string }
- *               newPassword: { type: string, minLength: 8, maxLength: 72 }
+ *               newPassword: { type: string, minLength: 1, maxLength: 72 }
  *     responses:
  *       '200':
  *         description: Password changed
