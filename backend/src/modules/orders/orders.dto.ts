@@ -54,6 +54,11 @@ export const updateOrderStatusSchema = z.object({
 });
 export type UpdateOrderStatusInput = z.infer<typeof updateOrderStatusSchema>;
 
+export const markPaidSchema = z.object({
+  utrReference: z.string().trim().max(50).optional(),
+});
+export type MarkPaidInput = z.infer<typeof markPaidSchema>;
+
 export const listAdminOrdersSchema = z.object({
   page: z.coerce.number().int().positive().optional(),
   limit: z.coerce.number().int().positive().optional(),

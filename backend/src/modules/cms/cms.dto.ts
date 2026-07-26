@@ -49,5 +49,8 @@ export const settingsContentSchema = z.object({
   whatsappNumber: z.string().trim().min(8, 'Enter a valid WhatsApp number with country code'),
   upiVpa: z.string().trim().regex(/^[\w.-]+@[\w.-]+$/, 'Enter a valid UPI ID (e.g. name@bank)'),
   upiPayeeName: z.string().trim().min(1).max(100),
+  deliveryFeePaise: z.number().int().min(0).default(0),
+  platformFeePaise: z.number().int().min(0).default(0),
+  gstPercent: z.number().min(0).max(100).default(0),
 });
 export type SettingsContentInput = z.infer<typeof settingsContentSchema>;

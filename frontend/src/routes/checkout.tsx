@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -18,6 +19,7 @@ import { useAuthStore } from "@/store/authStore";
 import { createOrder } from "@/features/orders/services/ordersApi";
 import { submitPaymentReference, declinePayment } from "@/features/payments/services/paymentsApi";
 import type { UpiPaymentInfo } from "@/features/orders/types";
+import { getSettings } from "@/features/cms/services/cmsApi";
 import { getApiErrorMessage } from "@/lib/axios";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -61,6 +63,11 @@ function CheckoutPage() {
   const [submitting, setSubmitting] = useState(false);
   const [idempotencyKey] = useState(() => crypto.randomUUID());
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+
+  const { data: settings } = useQuery({
+    queryKey: ["cms-settings"],
+    queryFn: () => getSettings().catch(() => null),
+  });
 
   const {
     register,
@@ -138,10 +145,14 @@ function CheckoutPage() {
     );
   };
 
-  const gst = Math.round(cartTotal * 0.05);
-  const delivery = cartTotal > 0 ? 29 : 0;
+  const gstPercent = settings?.gstPercent ?? 0;
+  const deliveryFee = settings ? Math.round(settings.deliveryFeePaise / 100) : 0;
+  const platformFee = settings ? Math.round(settings.platformFeePaise / 100) : 0;
+  const gst = Math.round(cartTotal * (gstPercent / 100));
+  const delivery = cartTotal > 0 ? deliveryFee : 0;
+  const platform = cartTotal > 0 ? platformFee : 0;
   const discount = Math.round(couponDiscountPaise / 100);
-  const grand = Math.max(0, cartTotal + gst + delivery - discount);
+  const grand = Math.max(0, cartTotal + gst + delivery + platform - discount);
 
   if (!currentUser) {
     return (
@@ -449,8 +460,9 @@ function CheckoutPage() {
         ))}
         <div className="border-t pt-3 space-y-1 text-sm">
           <Row label="Subtotal" v={cartTotal} />
-          <Row label="GST" v={gst} />
-          <Row label="Delivery" v={delivery} />
+          {gst > 0 && <Row label={`GST (${gstPercent}%)`} v={gst} />}
+          <Row label="Delivery" v={delivery} free={delivery === 0} />
+          <Row label="Platform Fee" v={platform} free={platform === 0} />
           {discount > 0 && (
             <div className="flex justify-between text-success">
               <span>Coupon Discount{couponCode ? ` (${couponCode})` : ""}</span>
@@ -494,11 +506,11 @@ function Field({
     </div>
   );
 }
-function Row({ label, v }: { label: string; v: number }) {
+function Row({ label, v, free }: { label: string; v: number; free?: boolean }) {
   return (
     <div className="flex justify-between">
       <span className="text-muted-foreground">{label}</span>
-      <span>₹{v}</span>
+      <span className={free ? "text-success font-medium" : ""}>{free ? "Free" : `₹${v}`}</span>
     </div>
   );
 }

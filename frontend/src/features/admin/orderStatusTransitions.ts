@@ -1,6 +1,9 @@
 /** Mirrors the backend's ORDER_STATUS_TRANSITIONS (src/types/domain.types.ts) — used only to populate the admin "next status" picker with valid choices; the backend re-validates and is the actual source of truth. */
 const TRANSITIONS: Record<string, string[]> = {
-  PENDING_PAYMENT: ["ORDER_PLACED", "PAYMENT_FAILED"],
+  // ORDER_PLACED is deliberately excluded here — moving out of PENDING_PAYMENT on the
+  // success path must go through the "Mark as Paid" action so paymentStatus is set
+  // consistently with status (see markOrderPaid / applyPaymentOutcome).
+  PENDING_PAYMENT: ["PAYMENT_FAILED"],
   PAYMENT_FAILED: [],
   ORDER_PLACED: ["RESTAURANT_NOTIFIED", "CANCELLED_BY_PASSENGER", "CANCELLED_BY_ADMIN"],
   RESTAURANT_NOTIFIED: [

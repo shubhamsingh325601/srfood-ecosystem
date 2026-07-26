@@ -6,7 +6,16 @@ export interface DashboardSummary {
   pendingOrders: number;
   totalUsers: number;
   totalMenuItems: number;
-  recentOrders: { _id: string; orderId: string; grandTotal: number; status: string }[];
+  recentOrders: {
+    _id: string;
+    orderId: string;
+    customerName: string;
+    customerMobile: string;
+    paymentMethod: string;
+    paymentStatus: string;
+    grandTotal: number;
+    status: string;
+  }[];
 }
 
 export async function getDashboardSummary(): Promise<DashboardSummary> {
@@ -18,10 +27,23 @@ export interface AdminOrder {
   _id: string;
   orderId: string;
   passengerId: string;
+  customerName: string;
+  customerMobile: string;
+  deliveryAddress: {
+    line: string;
+    landmark?: string;
+    city: string;
+    state: string;
+  };
   status: string;
   paymentMethod: string;
   paymentStatus: string;
   utrReference?: string;
+  subtotal: number;
+  deliveryFeePaise: number;
+  platformFeePaise: number;
+  gstAmountPaise: number;
+  couponDiscountPaise: number;
   grandTotal: number;
   createdAt: string;
   items: { name: string; quantity: number }[];
@@ -42,6 +64,11 @@ export async function updateOrderStatus(
   note?: string,
 ): Promise<AdminOrder> {
   const { data } = await api.patch(`/orders/${id}/status`, { status, note });
+  return data.data;
+}
+
+export async function markOrderPaid(id: string, utrReference?: string): Promise<AdminOrder> {
+  const { data } = await api.patch(`/orders/${id}/mark-paid`, { utrReference });
   return data.data;
 }
 

@@ -32,4 +32,7 @@ export interface SettingsContent {
   whatsappNumber: string;
   upiVpa: string;
   upiPayeeName: string;
+  deliveryFeePaise: number;
+  platformFeePaise: number;
+  gstPercent: number;
 }

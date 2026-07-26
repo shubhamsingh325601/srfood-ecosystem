@@ -13,6 +13,9 @@ const EMPTY_SETTINGS: SettingsContent = {
   whatsappNumber: "",
   upiVpa: "",
   upiPayeeName: "",
+  deliveryFeePaise: 0,
+  platformFeePaise: 0,
+  gstPercent: 0,
 };
 
 export function Footer() {

@@ -51,6 +51,8 @@ import {
   Eye,
   EyeOff,
   Tag,
+  Upload,
+  Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -62,6 +64,7 @@ import {
   getDashboardSummary,
   listAdminOrders,
   updateOrderStatus,
+  markOrderPaid,
   listAdminUsers,
   setUserBlocked,
   type AdminOrder,
@@ -86,6 +89,7 @@ import {
 import { paiseToRupees } from "@/features/menu/mappers";
 import type { ApiCategory, ApiMenuItem } from "@/features/menu/types";
 import { listAdminRatings, moderateRating } from "@/features/ratings/services/ratingsApi";
+import { uploadImage } from "@/features/uploads/services/uploadsApi";
 import {
   listAllCoupons,
   createCoupon,
@@ -416,6 +420,8 @@ function Dashboard() {
             <TableHeader>
               <TableRow>
                 <TableHead>ID</TableHead>
+                <TableHead>Customer</TableHead>
+                <TableHead>Payment</TableHead>
                 <TableHead>Total</TableHead>
                 <TableHead>Status</TableHead>
               </TableRow>
@@ -424,6 +430,18 @@ function Dashboard() {
               {data.recentOrders.map((o) => (
                 <TableRow key={o._id}>
                   <TableCell className="font-mono text-xs">{o.orderId}</TableCell>
+                  <TableCell>
+                    <div className="text-sm font-medium">{o.customerName}</div>
+                    <div className="text-xs text-muted-foreground">{o.customerMobile}</div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="text-sm">{o.paymentMethod}</div>
+                    <div
+                      className={`text-xs ${o.paymentStatus === "captured" ? "text-green-600" : "text-amber-600"}`}
+                    >
+                      {o.paymentStatus}
+                    </div>
+                  </TableCell>
                   <TableCell>₹{paiseToRupees(o.grandTotal)}</TableCell>
                   <TableCell>{statusLabel(o.status)}</TableCell>
                 </TableRow>
@@ -604,6 +622,73 @@ function ConfirmDialog({
   );
 }
 
+function ImageUploadField({
+  value,
+  onChange,
+  folder,
+}: {
+  value: string;
+  onChange: (url: string) => void;
+  folder: "menu-items" | "categories";
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const handleFile = async (file: File | undefined) => {
+    if (!file) return;
+    if (!["image/jpeg", "image/png", "image/webp", "image/gif"].includes(file.type)) {
+      toast.error("Please choose a JPEG, PNG, WEBP or GIF image");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image must be under 5MB");
+      return;
+    }
+    setUploading(true);
+    try {
+      const url = await uploadImage(file, folder);
+      onChange(url);
+      toast.success("Image uploaded");
+    } catch (e) {
+      toast.error(getApiErrorMessage(e, "Could not upload image"));
+    } finally {
+      setUploading(false);
+      if (inputRef.current) inputRef.current.value = "";
+    }
+  };
+
+  return (
+    <div className="space-y-1.5">
+      <Label>Image</Label>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp,image/gif"
+        className="hidden"
+        onChange={(e) => handleFile(e.target.files?.[0])}
+      />
+      <div className="flex gap-2">
+        <Input
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="Upload below, or paste an image URL"
+          className="flex-1"
+        />
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => inputRef.current?.click()}
+          disabled={uploading}
+          className="shrink-0"
+        >
+          {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+        </Button>
+      </div>
+      {value && <img src={value} alt="" className="w-full h-40 object-cover rounded-lg border" />}
+    </div>
+  );
+}
+
 interface MenuDraft {
   name: string;
   shortDescription: string;
@@ -696,17 +781,11 @@ function MenuPanel({
               </Select>
             </div>
           </div>
-          <div className="space-y-1.5">
-            <Label>Image URL</Label>
-            <Input
-              value={f.imageUrl}
-              onChange={(e) => setF({ ...f, imageUrl: e.target.value })}
-              placeholder="https://..."
-            />
-          </div>
-          {f.imageUrl && (
-            <img src={f.imageUrl} alt="" className="w-full h-40 object-cover rounded-lg border" />
-          )}
+          <ImageUploadField
+            value={f.imageUrl}
+            onChange={(imageUrl) => setF({ ...f, imageUrl })}
+            folder="menu-items"
+          />
           <div className="flex items-center gap-2">
             <input
               type="checkbox"
@@ -961,17 +1040,11 @@ function CategoryPanel({
               />
             </div>
           </div>
-          <div className="space-y-1.5">
-            <Label>Image URL</Label>
-            <Input
-              value={f.imageUrl}
-              onChange={(e) => setF({ ...f, imageUrl: e.target.value })}
-              placeholder="https://..."
-            />
-          </div>
-          {f.imageUrl && (
-            <img src={f.imageUrl} alt="" className="w-full h-40 object-cover rounded-lg border" />
-          )}
+          <ImageUploadField
+            value={f.imageUrl}
+            onChange={(imageUrl) => setF({ ...f, imageUrl })}
+            folder="categories"
+          />
         </div>
         <SheetFooter className="p-5 border-t flex-row gap-2 sm:justify-end">
           <Button
@@ -1386,6 +1459,14 @@ function OrdersAdmin() {
     },
     onError: (e) => toast.error(getApiErrorMessage(e)),
   });
+  const markPaidMutation = useMutation({
+    mutationFn: (id: string) => markOrderPaid(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-orders"] });
+      toast.success("Payment marked as received");
+    },
+    onError: (e) => toast.error(getApiErrorMessage(e, "Could not mark payment as received")),
+  });
 
   if (isLoading) return <p className="text-sm text-muted-foreground py-10 text-center">Loading…</p>;
 
@@ -1404,6 +1485,7 @@ function OrdersAdmin() {
             <TableHeader>
               <TableRow>
                 <TableHead>Order</TableHead>
+                <TableHead>Customer</TableHead>
                 <TableHead>Items</TableHead>
                 <TableHead>Payment</TableHead>
                 <TableHead>Total</TableHead>
@@ -1421,6 +1503,15 @@ function OrdersAdmin() {
                         {new Date(o.createdAt).toLocaleString()}
                       </div>
                     </TableCell>
+                    <TableCell>
+                      <div className="text-sm font-medium">{o.customerName}</div>
+                      <div className="text-xs text-muted-foreground">{o.customerMobile}</div>
+                      <div className="text-xs text-muted-foreground max-w-[200px] truncate">
+                        {o.deliveryAddress?.line}
+                        {o.deliveryAddress?.landmark ? `, ${o.deliveryAddress.landmark}` : ""}
+                        {o.deliveryAddress?.city ? `, ${o.deliveryAddress.city}` : ""}
+                      </div>
+                    </TableCell>
                     <TableCell className="text-xs">
                       {o.items.map((i) => `${i.name}×${i.quantity}`).join(", ")}
                     </TableCell>
@@ -1435,6 +1526,17 @@ function OrdersAdmin() {
                         <div className="text-xs text-muted-foreground font-mono mt-0.5">
                           UTR: {o.utrReference}
                         </div>
+                      )}
+                      {o.status === "PENDING_PAYMENT" && o.paymentStatus !== "captured" && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="mt-1.5 h-7 text-xs"
+                          disabled={markPaidMutation.isPending}
+                          onClick={() => markPaidMutation.mutate(o._id)}
+                        >
+                          Mark as Paid
+                        </Button>
                       )}
                     </TableCell>
                     <TableCell className="font-bold">₹{paiseToRupees(o.grandTotal)}</TableCell>
@@ -1751,6 +1853,9 @@ function ContentAdmin() {
     whatsappNumber: "",
     upiVpa: "",
     upiPayeeName: "",
+    deliveryFeePaise: 0,
+    platformFeePaise: 0,
+    gstPercent: 0,
   };
 
   const { data: homepage } = useQuery({
@@ -2081,6 +2186,56 @@ function ContentAdmin() {
               placeholder="SR Food"
               value={settingsDraft.upiPayeeName}
               onChange={(e) => setSettingsDraft({ ...settingsDraft, upiPayeeName: e.target.value })}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-card border rounded-2xl p-5 space-y-3">
+        <h2 className="font-bold">Order Pricing</h2>
+        <p className="text-sm text-muted-foreground">
+          Extra charges applied on top of item cost at checkout. Set to 0 to charge customers only
+          for the items — that's what's currently live.
+        </p>
+        <div className="grid md:grid-cols-3 gap-3">
+          <div className="space-y-1.5">
+            <Label>Delivery Fee (₹)</Label>
+            <Input
+              type="number"
+              min={0}
+              value={paiseToRupees(settingsDraft.deliveryFeePaise)}
+              onChange={(e) =>
+                setSettingsDraft({
+                  ...settingsDraft,
+                  deliveryFeePaise: Math.round(Number(e.target.value) * 100),
+                })
+              }
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Platform Fee (₹)</Label>
+            <Input
+              type="number"
+              min={0}
+              value={paiseToRupees(settingsDraft.platformFeePaise)}
+              onChange={(e) =>
+                setSettingsDraft({
+                  ...settingsDraft,
+                  platformFeePaise: Math.round(Number(e.target.value) * 100),
+                })
+              }
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label>GST (%)</Label>
+            <Input
+              type="number"
+              min={0}
+              max={100}
+              value={settingsDraft.gstPercent}
+              onChange={(e) =>
+                setSettingsDraft({ ...settingsDraft, gstPercent: Number(e.target.value) })
+              }
             />
           </div>
         </div>

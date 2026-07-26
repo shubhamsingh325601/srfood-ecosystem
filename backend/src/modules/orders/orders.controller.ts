@@ -56,4 +56,9 @@ export const ordersController = {
     const order = await ordersService.updateStatus(req.params.id, user, req.body);
     sendSuccess(res, order, { message: 'Order status updated' });
   }),
+
+  markPaid: asyncHandler(async (req: Request, res: Response) => {
+    const order = await ordersService.applyPaymentOutcome(req.params.id, 'CAPTURED', req.body);
+    sendSuccess(res, order, { message: 'Payment marked as received' });
+  }),
 };

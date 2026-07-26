@@ -1,11 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Trash2, Minus, Plus, ShoppingBag, ArrowRight, Tag, X } from "lucide-react";
 import { toast } from "sonner";
 import { useCartStore, selectCartTotal } from "@/store/cartStore";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { validateCoupon } from "@/features/coupons/services/couponsApi";
+import { getSettings } from "@/features/cms/services/cmsApi";
 import { getApiErrorMessage } from "@/lib/axios";
 
 export const Route = createFileRoute("/cart")({
@@ -27,10 +29,19 @@ function CartPage() {
   const [couponInput, setCouponInput] = useState("");
   const [applying, setApplying] = useState(false);
 
-  const gst = Math.round(cartTotal * 0.05);
-  const delivery = cartTotal > 0 ? 29 : 0;
+  const { data: settings } = useQuery({
+    queryKey: ["cms-settings"],
+    queryFn: () => getSettings().catch(() => null),
+  });
+  const gstPercent = settings?.gstPercent ?? 0;
+  const deliveryFee = settings ? Math.round(settings.deliveryFeePaise / 100) : 0;
+  const platformFee = settings ? Math.round(settings.platformFeePaise / 100) : 0;
+
+  const gst = Math.round(cartTotal * (gstPercent / 100));
+  const delivery = cartTotal > 0 ? deliveryFee : 0;
+  const platform = cartTotal > 0 ? platformFee : 0;
   const discount = Math.round(couponDiscountPaise / 100);
-  const grand = Math.max(0, cartTotal + gst + delivery - discount);
+  const grand = Math.max(0, cartTotal + gst + delivery + platform - discount);
 
   const handleApplyCoupon = async () => {
     const code = couponInput.trim().toUpperCase();
@@ -159,8 +170,17 @@ function CartPage() {
         )}
 
         <Row label="Item Total" value={`₹${cartTotal}`} />
-        <Row label="GST (5%)" value={`₹${gst}`} />
-        <Row label="Delivery Fee" value={`₹${delivery}`} />
+        {gst > 0 && <Row label={`GST (${gstPercent}%)`} value={`₹${gst}`} />}
+        <Row
+          label="Delivery Fee"
+          value={delivery > 0 ? `₹${delivery}` : "Free"}
+          highlight={delivery === 0}
+        />
+        <Row
+          label="Platform Fee"
+          value={platform > 0 ? `₹${platform}` : "Free"}
+          highlight={platform === 0}
+        />
         {discount > 0 && <Row label="Coupon Discount" value={`-₹${discount}`} />}
         <div className="border-t pt-3 flex justify-between font-bold text-lg">
           <span>To Pay</span>
@@ -176,11 +196,19 @@ function CartPage() {
   );
 }
 
-function Row({ label, value }: { label: string; value: string }) {
+function Row({
+  label,
+  value,
+  highlight,
+}: {
+  label: string;
+  value: string;
+  highlight?: boolean;
+}) {
   return (
     <div className="flex justify-between text-sm">
       <span className="text-muted-foreground">{label}</span>
-      <span className="font-medium">{value}</span>
+      <span className={`font-medium ${highlight ? "text-success" : ""}`}>{value}</span>
     </div>
   );
 }

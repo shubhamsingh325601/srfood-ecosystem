@@ -11,6 +11,7 @@ import {
   createOrderSchema,
   listAdminOrdersSchema,
   listOrdersSchema,
+  markPaidSchema,
   orderIdParamSchema,
   updateOrderStatusSchema,
 } from './orders.dto';
@@ -248,6 +249,46 @@ ordersRoutes.patch(
   requireRole(UserRole.ADMIN, UserRole.SUPER_ADMIN),
   validate({ params: orderIdParamSchema, body: updateOrderStatusSchema }),
   ordersController.updateStatus,
+);
+
+/**
+ * @openapi
+ * /orders/{id}/mark-paid:
+ *   patch:
+ *     summary: Manually mark a pending-payment order's UPI payment as received (admin)
+ *     description: Use this when a customer paid via UPI but never confirmed it in the app (or the admin verified it directly in the bank/UPI statement). Transitions the order to ORDER_PLACED and paymentStatus to captured — mirrors the customer-facing "confirm payment" flow.
+ *     tags: [Orders]
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - { in: path, name: id, required: true, schema: { type: string } }
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               utrReference: { type: string, maxLength: 50, description: 'UPI transaction reference, if known' }
+ *     responses:
+ *       '200':
+ *         description: Payment marked as received
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/OrderResponse' }
+ *       '401': { $ref: '#/components/responses/Unauthorized' }
+ *       '403': { $ref: '#/components/responses/Forbidden' }
+ *       '404': { $ref: '#/components/responses/NotFound' }
+ *       '409':
+ *         description: Order is not awaiting payment
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/ErrorResponse' }
+ */
+ordersRoutes.patch(
+  '/:id/mark-paid',
+  requireAuth,
+  requireRole(UserRole.ADMIN, UserRole.SUPER_ADMIN),
+  validate({ params: orderIdParamSchema, body: markPaidSchema }),
+  ordersController.markPaid,
 );
 
 export const adminOrdersRoutes = Router();

@@ -1,10 +1,23 @@
 import { PRICING } from '@/config/constants';
 import { MenuItem, type MenuItemDocument } from '@/models/MenuItem.model';
+import { cmsRepository } from '@/modules/cms/cms.repository';
 import { couponsService } from '@/modules/coupons/coupons.service';
+import { CmsContentType } from '@/types/domain.types';
 import { BadRequestError, NotFoundError } from '@/utils/errors';
 
 import type { CartItemInput, ValidateCartInput } from './cart.dto';
 import type { ValidatedCart, ValidatedCartItem } from './cart.types';
+
+/** Falls back to zero fees if the admin hasn't published settings yet — checkout must never break because of missing CMS content. */
+async function getPricingSettings(): Promise<{ deliveryFeePaise: number; platformFeePaise: number; gstPercent: number }> {
+  const settings = await cmsRepository.find(CmsContentType.SETTINGS);
+  const data = settings?.data as Partial<{ deliveryFeePaise: number; platformFeePaise: number; gstPercent: number }> | undefined;
+  return {
+    deliveryFeePaise: data?.deliveryFeePaise ?? 0,
+    platformFeePaise: data?.platformFeePaise ?? 0,
+    gstPercent: data?.gstPercent ?? 0,
+  };
+}
 
 function resolveCustomizationPrice(item: MenuItemDocument, input: CartItemInput): { priceDeltaTotal: number; resolved: ValidatedCartItem['customizations'] } {
   const resolved: ValidatedCartItem['customizations'] = [];
@@ -64,9 +77,10 @@ export const cartService = {
       throw new BadRequestError(`Minimum order value is ₹${PRICING.MIN_ORDER_VALUE_PAISE / 100}`);
     }
 
-    const deliveryFeePaise = PRICING.DELIVERY_FEE_PAISE;
-    const platformFeePaise = PRICING.PLATFORM_FEE_PAISE;
-    const gstAmountPaise = Math.round(subtotal * (PRICING.GST_PERCENT / 100));
+    const pricing = await getPricingSettings();
+    const deliveryFeePaise = pricing.deliveryFeePaise;
+    const platformFeePaise = pricing.platformFeePaise;
+    const gstAmountPaise = Math.round(subtotal * (pricing.gstPercent / 100));
 
     let couponDiscountPaise = 0;
     let couponId: string | undefined;

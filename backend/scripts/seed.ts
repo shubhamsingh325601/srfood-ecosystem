@@ -296,6 +296,9 @@ async function seedCmsContent(): Promise<void> {
         whatsappNumber: '+91 6378639934',
         upiVpa: '6378639934-3@ybl',
         upiPayeeName: 'SR Food',
+        deliveryFeePaise: 0,
+        platformFeePaise: 0,
+        gstPercent: 0,
       },
     },
   ];

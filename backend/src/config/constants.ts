@@ -5,9 +5,8 @@ export const PAGINATION_DEFAULTS = {
 } as const;
 
 export const PRICING = {
-  GST_PERCENT: 5,
-  DELIVERY_FEE_PAISE: 2900,
-  PLATFORM_FEE_PAISE: 0,
+  // Delivery fee, platform fee, and GST% are admin-configurable via CMS Settings
+  // (see cart.service.ts getPricingSettings) — not hardcoded here.
   MIN_ORDER_VALUE_PAISE: 10000,
   COD_ELIGIBLE: true,
   COD_MAX_AMOUNT_PAISE: 50000,

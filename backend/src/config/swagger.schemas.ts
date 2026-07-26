@@ -658,6 +658,11 @@ export const schemas: Record<string, Schema> = {
 
   InvoiceResponse: success(ref('Invoice')),
 
+  ImageUploadResponse: success({
+    type: 'object',
+    properties: { url: { type: 'string', example: 'https://res.cloudinary.com/.../image.jpg' } },
+  }),
+
   NotificationResponse: success(ref('Notification')),
   NotificationListResponse: paginated(ref('Notification')),
 

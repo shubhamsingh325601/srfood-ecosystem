@@ -27,6 +27,7 @@ export const swaggerSpec = swaggerJsdoc({
       { name: 'Ratings', description: 'Post-delivery ratings & reviews' },
       { name: 'Support', description: 'Support tickets' },
       { name: 'Invoices', description: 'Order invoice PDFs' },
+      { name: 'Uploads', description: 'Admin image uploads (menu items, categories)' },
       { name: 'Notifications', description: "Own in-app notifications" },
       { name: 'CMS', description: 'Homepage/FAQ/legal/settings content' },
       { name: 'Admin', description: 'Dashboard, audit logs, roles' },

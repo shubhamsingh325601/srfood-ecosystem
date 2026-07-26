@@ -14,6 +14,7 @@ import { paymentsRoutes } from '@/modules/payments/payments.routes';
 import { adminRatingsRoutes, ratingsRoutes } from '@/modules/ratings/ratings.routes';
 import { reportsRoutes } from '@/modules/reports/reports.routes';
 import { adminSupportRoutes, supportRoutes } from '@/modules/support/support.routes';
+import { adminUploadsRoutes } from '@/modules/uploads/uploads.routes';
 import { adminUsersRoutes, usersRoutes } from '@/modules/users/users.routes';
 
 export const apiRouter = Router();
@@ -43,4 +44,5 @@ apiRouter.use('/admin/cms', adminCmsRoutes);
 apiRouter.use('/admin/analytics', analyticsRoutes);
 apiRouter.use('/admin/reports', reportsRoutes);
 apiRouter.use('/admin/ratings', adminRatingsRoutes);
+apiRouter.use('/admin/uploads', adminUploadsRoutes);
 apiRouter.use('/admin', adminRoutes);
