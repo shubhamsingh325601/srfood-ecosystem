@@ -32,9 +32,13 @@ export const config = {
     authKey: env.MSG91_AUTH_KEY,
     senderId: env.MSG91_SENDER_ID,
   },
-  sendgrid: {
-    apiKey: env.SENDGRID_API_KEY,
-    fromEmail: env.SENDGRID_FROM_EMAIL,
+  resend: {
+    apiKey: env.RESEND_API_KEY,
+    fromEmail: env.RESEND_FROM_EMAIL,
+  },
+  admin: {
+    email: env.ADMIN_EMAIL,
+    panelUrl: env.ADMIN_PANEL_URL,
   },
   cors: {
     allowedOrigins: env.CORS_ALLOWED_ORIGINS.split(',').map((o) => o.trim()),

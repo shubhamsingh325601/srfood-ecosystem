@@ -21,7 +21,7 @@ export function Categories() {
   const categories = data ?? [];
 
   return (
-    <section className="space-y-4">
+    <section id="home-categories" className="space-y-4 scroll-mt-36">
       <div className="flex items-end justify-between">
         <h2 className="text-2xl font-bold">Categories</h2>
         <Link to="/categories" className="text-sm font-semibold text-primary hover:underline">

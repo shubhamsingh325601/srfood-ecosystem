@@ -36,7 +36,7 @@ export function Footer() {
         <div>
           <Logo />
           <p className="text-sm text-muted-foreground mt-3 max-w-xs">
-            Ghar jaisa khana, Kota mein. Hygienic, fresh meals delivered fast across the city.
+            Ghar jaisa khana, Kota aur Sawai Madhopur mein. Hygienic, fresh meals delivered fast across both cities.
           </p>
         </div>
         <div>

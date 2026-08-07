@@ -1432,6 +1432,7 @@ function OfferPanel({
 
 function OrdersAdmin() {
   const queryClient = useQueryClient();
+  const [selectedOrder, setSelectedOrder] = useState<AdminOrder | null>(null);
   const { data, isLoading } = useQuery({
     queryKey: ["admin-orders"],
     queryFn: () => listAdminOrders({ limit: 100 }),
@@ -1502,6 +1503,14 @@ function OrdersAdmin() {
                       <div className="text-xs text-muted-foreground">
                         {new Date(o.createdAt).toLocaleString()}
                       </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="mt-1.5 h-7 text-xs"
+                        onClick={() => setSelectedOrder(o)}
+                      >
+                        View Details
+                      </Button>
                     </TableCell>
                     <TableCell>
                       <div className="text-sm font-medium">{o.customerName}</div>
@@ -1568,7 +1577,120 @@ function OrdersAdmin() {
           </Table>
         )}
       </div>
+      <OrderDetailPanel
+        order={selectedOrder}
+        open={!!selectedOrder}
+        onOpenChange={(open) => !open && setSelectedOrder(null)}
+      />
     </div>
+  );
+}
+
+function OrderDetailPanel({
+  order,
+  open,
+  onOpenChange,
+}: {
+  order: AdminOrder | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="right" className="w-[420px] sm:max-w-[420px] flex flex-col p-0">
+        <SheetHeader className="p-5 border-b">
+          <SheetTitle>Order Details</SheetTitle>
+        </SheetHeader>
+        {order && (
+          <div className="flex-1 overflow-y-auto p-5 space-y-5">
+            <div className="space-y-1">
+              <div className="font-mono text-sm font-bold">{order.orderId}</div>
+              <div className="text-xs text-muted-foreground">
+                {new Date(order.createdAt).toLocaleString()}
+              </div>
+              <span className="inline-block text-xs font-semibold mt-1">
+                {statusLabel(order.status)}
+              </span>
+            </div>
+
+            <div className="space-y-1">
+              <h3 className="font-semibold text-sm">Customer</h3>
+              <div className="text-sm">{order.customerName}</div>
+              <div className="text-sm text-muted-foreground">{order.customerMobile}</div>
+            </div>
+
+            <div className="space-y-1">
+              <h3 className="font-semibold text-sm">Delivery Address</h3>
+              <div className="text-sm">
+                {order.deliveryAddress?.line}
+                {order.deliveryAddress?.landmark ? `, ${order.deliveryAddress.landmark}` : ""}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                {order.deliveryAddress?.city}
+                {order.deliveryAddress?.state ? `, ${order.deliveryAddress.state}` : ""}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <h3 className="font-semibold text-sm">Items</h3>
+              <div className="border rounded-xl divide-y">
+                {order.items.map((i, idx) => (
+                  <div key={idx} className="flex items-center justify-between p-2 text-sm">
+                    <span>{i.name}</span>
+                    <span className="text-muted-foreground">×{i.quantity}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <h3 className="font-semibold text-sm">Payment</h3>
+              <div className="text-sm">{order.paymentMethod}</div>
+              <div
+                className={`text-xs ${order.paymentStatus === "captured" ? "text-green-600" : "text-amber-600"}`}
+              >
+                {order.paymentStatus}
+              </div>
+              {order.utrReference && (
+                <div className="text-xs text-muted-foreground font-mono">
+                  UTR: {order.utrReference}
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-1">
+              <h3 className="font-semibold text-sm">Bill Summary</h3>
+              <div className="text-sm flex justify-between">
+                <span className="text-muted-foreground">Subtotal</span>
+                <span>₹{paiseToRupees(order.subtotal)}</span>
+              </div>
+              <div className="text-sm flex justify-between">
+                <span className="text-muted-foreground">Delivery Fee</span>
+                <span>₹{paiseToRupees(order.deliveryFeePaise)}</span>
+              </div>
+              <div className="text-sm flex justify-between">
+                <span className="text-muted-foreground">Platform Fee</span>
+                <span>₹{paiseToRupees(order.platformFeePaise)}</span>
+              </div>
+              <div className="text-sm flex justify-between">
+                <span className="text-muted-foreground">GST</span>
+                <span>₹{paiseToRupees(order.gstAmountPaise)}</span>
+              </div>
+              {order.couponDiscountPaise > 0 && (
+                <div className="text-sm flex justify-between">
+                  <span className="text-muted-foreground">Coupon Discount</span>
+                  <span>-₹{paiseToRupees(order.couponDiscountPaise)}</span>
+                </div>
+              )}
+              <div className="text-sm font-bold flex justify-between pt-1 border-t">
+                <span>Grand Total</span>
+                <span>₹{paiseToRupees(order.grandTotal)}</span>
+              </div>
+            </div>
+          </div>
+        )}
+      </SheetContent>
+    </Sheet>
   );
 }
 

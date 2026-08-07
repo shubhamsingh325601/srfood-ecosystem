@@ -16,11 +16,6 @@ export async function getMenuItem(id: string): Promise<ApiMenuItem> {
   return data.data;
 }
 
-export async function getPopularItems(limit = 5): Promise<ApiMenuItem[]> {
-  const { data } = await api.get("/menu/items/popular", { params: { limit } });
-  return data.data;
-}
-
 export interface MenuItemPayload {
   categoryId: string;
   name: string;

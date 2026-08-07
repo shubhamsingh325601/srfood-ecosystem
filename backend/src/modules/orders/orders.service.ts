@@ -3,6 +3,7 @@ import type { OrderDocument } from '@/models/Order.model';
 import { cartService } from '@/modules/cart/cart.service';
 import { couponsService } from '@/modules/coupons/coupons.service';
 import { paymentsService } from '@/modules/payments/payments.service';
+import { sendAdminOrderAlert } from '@/services/email.service';
 import { notifyAdmins, notifyUser } from '@/services/notification.service';
 import { NotificationEvent, ORDER_STATUS_TRANSITIONS, OrderStatus, PaymentMode, PaymentStatus, UserRole } from '@/types/domain.types';
 import { BadRequestError, ConflictError, ForbiddenError, NotFoundError } from '@/utils/errors';
@@ -107,6 +108,7 @@ export const ordersService = {
         'New order received',
         `Order ${order.orderId} — ₹${(order.grandTotal / 100).toFixed(2)} (COD)`,
       );
+      void sendAdminOrderAlert(order).catch(() => undefined);
       return { order, payment: null, replay: false };
     }
 
@@ -230,6 +232,7 @@ export const ordersService = {
         'New order received',
         `Order ${order.orderId} — ₹${(order.grandTotal / 100).toFixed(2)}`,
       );
+      if (updated) void sendAdminOrderAlert(updated).catch(() => undefined);
       return updated;
     }
 

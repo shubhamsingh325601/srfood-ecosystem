@@ -63,6 +63,10 @@ function MenuPage() {
     if (match) setCat(match.name);
   }, [search.category, categories]);
 
+  useEffect(() => {
+    setQ(search.q ?? "");
+  }, [search.q]);
+
   const items = useMemo(() => {
     let r = foods.filter(
       (f) =>
@@ -84,7 +88,7 @@ function MenuPage() {
         <div>
           <h1 className="text-3xl font-bold">Menu</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Fresh, hygienic meals — delivered across Kota.
+            Fresh, hygienic meals — delivered across Kota & Sawai Madhopur.
           </p>
         </div>
 

@@ -360,7 +360,7 @@ const DeliveryAddress: Schema = {
   properties: {
     line: { type: 'string', example: '123 Talwandi, Near City Mall' },
     landmark: { type: 'string', nullable: true, example: 'Opposite City Mall' },
-    city: { type: 'string', example: 'Kota' },
+    city: { type: 'string', example: 'Kota', description: 'Serviceable cities: Kota, Sawai Madhopur' },
     state: { type: 'string', example: 'Rajasthan' },
     lat: { type: 'number', nullable: true },
     lng: { type: 'number', nullable: true },

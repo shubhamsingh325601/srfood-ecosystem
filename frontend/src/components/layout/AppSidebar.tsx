@@ -1,7 +1,7 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
-  Home, UtensilsCrossed, ClipboardList, MapPin, Tag,
-  HelpCircle, LayoutGrid, Phone, Heart, User, LogOut,
+  Home, ClipboardList, MapPin, Tag,
+  HelpCircle, Phone, Heart, User, LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/authStore";
@@ -9,8 +9,6 @@ import { logoutRequest } from "@/features/auth/services/authApi";
 
 const items = [
   { title: "Home", url: "/", icon: Home },
-  { title: "Menu", url: "/menu", icon: UtensilsCrossed },
-  { title: "Categories", url: "/categories", icon: LayoutGrid },
   { title: "Favourites", url: "/favorites", icon: Heart },
   { title: "My Orders", url: "/orders", icon: ClipboardList },
   { title: "Track Order", url: "/track", icon: MapPin },

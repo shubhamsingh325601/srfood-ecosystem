@@ -250,11 +250,11 @@ async function seedCmsContent(): Promise<void> {
       type: CmsContentType.HOMEPAGE,
       data: {
         hero: [
-          { eyebrow: 'Tasty Food,', title: 'Delivered Fast!', desc: 'Delicious meals delivered to your doorstep across Kota. Hygienic. Fresh. On Time.', cta: 'Order Now' },
+          { eyebrow: 'Tasty Food,', title: 'Delivered Fast!', desc: 'Delicious meals delivered to your doorstep across Kota & Sawai Madhopur. Hygienic. Fresh. On Time.', cta: 'Order Now' },
           { eyebrow: 'Fresh Thalis,', title: 'Ghar Jaisa Khana!', desc: 'Regional flavors, packed hot and delivered across the city.', cta: 'Explore Menu' },
           { eyebrow: 'Hygienic Kitchens,', title: 'Honest Pricing!', desc: 'FSSAI-certified partners. Live tracking till your doorstep.', cta: 'See Offers' },
         ],
-        offer: { code: 'SRFOOD10', percent: 10, headline: 'On Your First Order', sub: 'Fast Delivery Across Kota' },
+        offer: { code: 'SRFOOD10', percent: 10, headline: 'On Your First Order', sub: 'Fast Delivery Across Kota & Sawai Madhopur' },
       },
     },
     {
@@ -262,7 +262,7 @@ async function seedCmsContent(): Promise<void> {
       data: {
         faqs: [
           { question: 'How do I place an order?', answer: 'Browse the menu, add items to your cart, then enter your name, mobile number and delivery address at checkout.', displayOrder: 1 },
-          { question: 'Where do you deliver?', answer: 'We currently deliver only within Kota, Rajasthan. Use "Use my location" at checkout for a quick, accurate address.', displayOrder: 2 },
+          { question: 'Where do you deliver?', answer: 'We currently deliver within Kota and the main city of Sawai Madhopur, Rajasthan. Use "Use my location" at checkout for a quick, accurate address.', displayOrder: 2 },
           { question: 'Can I cancel an order?', answer: 'Orders can be cancelled before they enter the Preparing stage. Contact support for assistance.', displayOrder: 3 },
           { question: 'What are the payment options?', answer: 'We accept UPI, Cards, Wallets and Cash on Delivery.', displayOrder: 4 },
           { question: 'Is the food hygienic?', answer: 'Our kitchen is FSSAI-certified and follows strict hygiene protocols.', displayOrder: 5 },
@@ -278,7 +278,7 @@ async function seedCmsContent(): Promise<void> {
     {
       type: CmsContentType.LEGAL_TERMS,
       data: {
-        text: 'By using SR Food you agree to place genuine orders with an accurate delivery address within Kota. Refunds are issued for undelivered or unsatisfactory orders as per our refund policy. Prices are inclusive of applicable taxes unless stated otherwise.',
+        text: 'By using SR Food you agree to place genuine orders with an accurate delivery address within Kota or Sawai Madhopur (main city). Refunds are issued for undelivered or unsatisfactory orders as per our refund policy. Prices are inclusive of applicable taxes unless stated otherwise.',
       },
     },
     {

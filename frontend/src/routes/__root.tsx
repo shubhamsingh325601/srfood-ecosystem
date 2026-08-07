@@ -68,26 +68,26 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "SRFOOD – Fresh Food Delivered in Kota" },
+      { title: "SRFOOD – Fresh Food Delivered in Kota & Sawai Madhopur" },
       {
         name: "description",
         content:
-          "Order hygienic, fresh meals delivered fast across Kota. Ghar jaisa khana, Kota mein.",
+          "Order hygienic, fresh meals delivered fast across Kota & Sawai Madhopur. Ghar jaisa khana, Kota aur Sawai Madhopur mein.",
       },
-      { property: "og:title", content: "SRFOOD – Fresh Food Delivered in Kota" },
+      { property: "og:title", content: "SRFOOD – Fresh Food Delivered in Kota & Sawai Madhopur" },
       {
         property: "og:description",
         content:
-          "Order hygienic, fresh meals delivered fast across Kota. Ghar jaisa khana, Kota mein.",
+          "Order hygienic, fresh meals delivered fast across Kota & Sawai Madhopur. Ghar jaisa khana, Kota aur Sawai Madhopur mein.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
 
-      { name: "twitter:title", content: "SRFOOD – Fresh Food Delivered in Kota" },
+      { name: "twitter:title", content: "SRFOOD – Fresh Food Delivered in Kota & Sawai Madhopur" },
       {
         name: "twitter:description",
         content:
-          "Order hygienic, fresh meals delivered fast across Kota. Ghar jaisa khana, Kota mein.",
+          "Order hygienic, fresh meals delivered fast across Kota & Sawai Madhopur. Ghar jaisa khana, Kota aur Sawai Madhopur mein.",
       },
       {
         property: "og:image",

@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { MapPin, Search, User, ShoppingCart, Menu, LogOut } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Logo } from "@/components/brand/Logo";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -47,6 +47,14 @@ export function Header() {
     e.preventDefault();
     nav({ to: "/menu", search: { q } as never });
   };
+
+  useEffect(() => {
+    if (q.trim() === "") return;
+    const timer = setTimeout(() => {
+      nav({ to: "/menu", search: { q } as never });
+    }, 2500);
+    return () => clearTimeout(timer);
+  }, [q, nav]);
   return (
     <header className="sticky top-0 z-50 bg-background/85 backdrop-blur-md border-b">
       <div className="px-4 md:px-6 h-[72px] flex items-center gap-3 md:gap-4">
@@ -74,7 +82,7 @@ export function Header() {
           <MapPin className="w-4 h-4 text-primary" />
           <div className="text-xs leading-tight">
             <div className="text-muted-foreground">Delivering in</div>
-            <div className="font-semibold text-foreground">Kota, Rajasthan</div>
+            <div className="font-semibold text-foreground">Kota & Sawai Madhopur</div>
           </div>
         </div>
 

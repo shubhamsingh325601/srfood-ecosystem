@@ -19,8 +19,11 @@ const envSchema = z.object({
   MSG91_AUTH_KEY: z.string().optional().default(''),
   MSG91_SENDER_ID: z.string().optional().default(''),
 
-  SENDGRID_API_KEY: z.string().optional().default(''),
-  SENDGRID_FROM_EMAIL: z.string().optional().default('no-reply@srfood.example'),
+  RESEND_API_KEY: z.string().optional().default(''),
+  RESEND_FROM_EMAIL: z.string().optional().default('no-reply@shreeradhefood.in'),
+
+  ADMIN_EMAIL: z.string().optional().default('rn4563138@gmail.com'),
+  ADMIN_PANEL_URL: z.string().optional().default('https://srfood.in'),
 
   CORS_ALLOWED_ORIGINS: z.string().default('http://localhost:3000'),
 

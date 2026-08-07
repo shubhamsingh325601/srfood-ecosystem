@@ -42,6 +42,9 @@ const schema = z.object({
 });
 type Form = z.infer<typeof schema>;
 
+const SERVICEABLE_CITIES = ["Kota", "Sawai Madhopur"] as const;
+type ServiceableCity = (typeof SERVICEABLE_CITIES)[number];
+
 function CheckoutPage() {
   const items = useCartStore((s) => s.items);
   const cartTotal = useCartStore(selectCartTotal);
@@ -63,6 +66,7 @@ function CheckoutPage() {
   const [submitting, setSubmitting] = useState(false);
   const [idempotencyKey] = useState(() => crypto.randomUUID());
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [deliveryCity, setDeliveryCity] = useState<ServiceableCity>("Kota");
 
   const { data: settings } = useQuery({
     queryKey: ["cms-settings"],
@@ -126,9 +130,12 @@ function CheckoutPage() {
           if (formatted) {
             setValue("address", formatted, { shouldValidate: true });
           }
-          if (city && !city.toLowerCase().includes("kota")) {
-            toast.error("This location looks outside Kota — we currently deliver only within Kota, Rajasthan. Please double check your address.");
+          const cityLower = city.toLowerCase();
+          const matchedCity = SERVICEABLE_CITIES.find((c) => cityLower.includes(c.toLowerCase()));
+          if (!matchedCity) {
+            toast.error("This location looks outside our delivery area — we currently deliver only in Kota and Sawai Madhopur (main city), Rajasthan. Please double check your address.");
           } else {
+            setDeliveryCity(matchedCity);
             toast.success("Location detected — please add your house/flat number and landmark.");
           }
         } catch {
@@ -196,7 +203,7 @@ function CheckoutPage() {
           deliveryAddress: {
             line: data.address,
             landmark: data.landmark || undefined,
-            city: "Kota",
+            city: deliveryCity,
             state: "Rajasthan",
             lat: coords?.lat,
             lng: coords?.lng,
@@ -418,9 +425,23 @@ function CheckoutPage() {
           </div>
           <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary bg-primary/10 rounded-full px-3 py-1">
             <MapPin className="w-3.5 h-3.5" />
-            Delivering in Kota, Rajasthan
+            Delivering in {deliveryCity}, Rajasthan
           </div>
           <div className="grid gap-3">
+            <Field label="City" error={undefined} full>
+              <div className="flex flex-wrap gap-2">
+                {SERVICEABLE_CITIES.map((c) => (
+                  <button
+                    type="button"
+                    key={c}
+                    onClick={() => setDeliveryCity(c)}
+                    className={`border rounded-full px-4 py-2 text-sm font-medium transition ${deliveryCity === c ? "border-primary bg-primary/10 text-primary" : "hover:border-primary/40"}`}
+                  >
+                    {c}
+                  </button>
+                ))}
+              </div>
+            </Field>
             <Field label="Full Address (house/flat no., street, area)" error={errors.address?.message} full>
               <Input placeholder="e.g. 12, Talwandi, Near City Mall" {...register("address")} />
             </Field>

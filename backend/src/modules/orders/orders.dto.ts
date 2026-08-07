@@ -4,21 +4,25 @@ import { validateCartSchema } from '@/modules/cart/cart.dto';
 import { OrderStatus, PaymentMethod } from '@/types/domain.types';
 
 
-const SERVICEABLE_CITY = 'Kota';
+const SERVICEABLE_CITIES = ['Kota', 'Sawai Madhopur'] as const;
 
 export const deliveryAddressSchema = z
   .object({
     line: z.string().trim().min(5, 'Address must be at least 5 characters').max(200),
     landmark: z.string().trim().max(100).optional(),
-    city: z.string().trim().max(60).default(SERVICEABLE_CITY),
+    city: z.string().trim().max(60).default(SERVICEABLE_CITIES[0]),
     state: z.string().trim().max(60).default('Rajasthan'),
     lat: z.number().optional(),
     lng: z.number().optional(),
   })
-  .refine((addr) => addr.city.toLowerCase() === SERVICEABLE_CITY.toLowerCase(), {
-    message: `We currently deliver only in ${SERVICEABLE_CITY}`,
-    path: ['city'],
-  });
+  .refine(
+    (addr) =>
+      SERVICEABLE_CITIES.some((c) => addr.city.toLowerCase().includes(c.toLowerCase())),
+    {
+      message: `We currently deliver only in ${SERVICEABLE_CITIES.join(' and ')}`,
+      path: ['city'],
+    },
+  );
 
 export const createOrderSchema = z.object({
   cart: validateCartSchema,
