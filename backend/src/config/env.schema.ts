@@ -5,7 +5,27 @@ const envSchema = z.object({
   PORT: z.coerce.number().int().positive().default(5000),
   API_VERSION: z.string().default('v1'),
 
+  APP_ID: z.string().min(1, 'APP_ID is required').regex(/^[a-z0-9-]+$/, 'APP_ID must be lowercase alphanumeric with hyphens only'),
+  APP_SECRET: z.string().min(32, 'APP_SECRET must be at least 32 characters'),
+  APP_NAME: z.string().min(1, 'APP_NAME is required'),
+  APP_TAGLINE: z.string().min(1, 'APP_TAGLINE is required'),
+  APP_DESCRIPTION: z.string().min(1, 'APP_DESCRIPTION is required'),
+  APP_OG_TITLE: z.string().optional().default(''),
+  APP_OG_DESCRIPTION: z.string().optional().default(''),
+  APP_THEME: z.enum(['orange', 'red']).default('orange'),
+
+  FEATURE_TRAINS: z.string().default('false').transform((v) => v === 'true'),
+  FEATURE_STATIONS: z.string().default('false').transform((v) => v === 'true'),
+  FEATURE_UPI_PAYMENTS: z.string().default('false').transform((v) => v === 'true'),
+  FEATURE_ADMIN_PRICING: z.string().default('false').transform((v) => v === 'true'),
+  FEATURE_FLOATING_CART_BAR: z.string().default('false').transform((v) => v === 'true'),
+  FEATURE_RESEND_EMAIL: z.string().default('false').transform((v) => v === 'true'),
+  FEATURE_SENDGRID_EMAIL: z.string().default('false').transform((v) => v === 'true'),
+  FEATURE_TWILIO_SMS: z.string().default('false').transform((v) => v === 'true'),
+  FEATURE_MSG91_SMS: z.string().default('false').transform((v) => v === 'true'),
+
   MONGO_URI: z.string().min(1, 'MONGO_URI is required'),
+  MONGO_DB_NAME: z.string().optional().default(''),
 
   JWT_ACCESS_SECRET: z.string().min(32, 'JWT_ACCESS_SECRET must be at least 32 characters'),
   JWT_REFRESH_SECRET: z.string().min(32, 'JWT_REFRESH_SECRET must be at least 32 characters'),
@@ -22,8 +42,14 @@ const envSchema = z.object({
   SENDGRID_API_KEY: z.string().optional().default(''),
   SENDGRID_FROM_EMAIL: z.string().optional().default('no-reply@srfood.example'),
 
+  RESEND_API_KEY: z.string().optional().default(''),
+  RESEND_FROM_EMAIL: z.string().optional().default('no-reply@shreeradhefood.in'),
+
   RAIL_API_BASE_URL: z.string().optional().default(''),
   RAIL_API_KEY: z.string().optional().default(''),
+
+  ADMIN_EMAIL: z.string().optional().default(''),
+  ADMIN_PANEL_URL: z.string().optional().default(''),
 
   CORS_ALLOWED_ORIGINS: z.string().default('http://localhost:3000'),
 

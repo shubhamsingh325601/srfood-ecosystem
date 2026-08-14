@@ -1,10 +1,48 @@
 import { PRICING } from '@/config/constants';
+import { config } from '@/config/index';
+import { cmsService } from '@/modules/cms/cms.service';
 import { MenuItem, type MenuItemDocument } from '@/models/MenuItem.model';
 import { couponsService } from '@/modules/coupons/coupons.service';
 import { BadRequestError, NotFoundError } from '@/utils/errors';
 
 import type { CartItemInput, ValidateCartInput } from './cart.dto';
 import type { ValidatedCart, ValidatedCartItem } from './cart.types';
+
+let cachedPricing: { deliveryFeePaise: number; platformFeePaise: number; gstPercent: number; minOrderValuePaise: number } | null = null;
+let cachedAt = 0;
+const PRICING_CACHE_TTL_MS = 60_000;
+
+async function getPricingSettings() {
+  const now = Date.now();
+  if (cachedPricing && now - cachedAt < PRICING_CACHE_TTL_MS) {
+    return cachedPricing;
+  }
+
+  if (config.app.features.adminPricing) {
+    try {
+      const settings = await cmsService.getSettings();
+      const pricing = (settings as Record<string, unknown>).pricing as Record<string, unknown> | undefined;
+      cachedPricing = {
+        deliveryFeePaise: Number(pricing?.deliveryFeePaise ?? 0),
+        platformFeePaise: Number(pricing?.platformFeePaise ?? 0),
+        gstPercent: Number(pricing?.gstPercent ?? 0),
+        minOrderValuePaise: Number(pricing?.minOrderValuePaise ?? 0),
+      };
+    } catch {
+      cachedPricing = { deliveryFeePaise: 0, platformFeePaise: 0, gstPercent: 0, minOrderValuePaise: 0 };
+    }
+  } else {
+    cachedPricing = {
+      deliveryFeePaise: PRICING.DELIVERY_FEE_PAISE,
+      platformFeePaise: PRICING.PLATFORM_FEE_PAISE,
+      gstPercent: PRICING.GST_PERCENT,
+      minOrderValuePaise: PRICING.MIN_ORDER_VALUE_PAISE,
+    };
+  }
+
+  cachedAt = now;
+  return cachedPricing;
+}
 
 function resolveCustomizationPrice(item: MenuItemDocument, input: CartItemInput): { priceDeltaTotal: number; resolved: ValidatedCartItem['customizations'] } {
   const resolved: ValidatedCartItem['customizations'] = [];
@@ -60,13 +98,15 @@ export const cartService = {
 
     const subtotal = items.reduce((sum, i) => sum + i.itemTotal, 0);
 
-    if (subtotal < PRICING.MIN_ORDER_VALUE_PAISE) {
-      throw new BadRequestError(`Minimum order value is ₹${PRICING.MIN_ORDER_VALUE_PAISE / 100}`);
+    const pricing = await getPricingSettings();
+
+    if (subtotal < pricing.minOrderValuePaise) {
+      throw new BadRequestError(`Minimum order value is ₹${pricing.minOrderValuePaise / 100}`);
     }
 
-    const deliveryFeePaise = PRICING.DELIVERY_FEE_PAISE;
-    const platformFeePaise = PRICING.PLATFORM_FEE_PAISE;
-    const gstAmountPaise = Math.round(subtotal * (PRICING.GST_PERCENT / 100));
+    const deliveryFeePaise = pricing.deliveryFeePaise;
+    const platformFeePaise = pricing.platformFeePaise;
+    const gstAmountPaise = Math.round(subtotal * (pricing.gstPercent / 100));
 
     let couponDiscountPaise = 0;
     let couponId: string | undefined;

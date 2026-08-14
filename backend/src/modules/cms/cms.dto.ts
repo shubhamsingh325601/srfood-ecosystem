@@ -47,7 +47,18 @@ export const settingsContentSchema = z.object({
   contactPhone: z.string().trim(),
   contactAddress: z.string().trim().max(300),
   whatsappNumber: z.string().trim().min(8, 'Enter a valid WhatsApp number with country code'),
-  upiVpa: z.string().trim().regex(/^[\w.-]+@[\w.-]+$/, 'Enter a valid UPI ID (e.g. name@bank)'),
-  upiPayeeName: z.string().trim().min(1).max(100),
+  upiVpa: z.string().trim().regex(/^[\w.-]+@[\w.-]+$/, 'Enter a valid UPI ID (e.g. name@bank)').optional().default(''),
+  upiPayeeName: z.string().trim().min(1).max(100).optional().default(''),
+  pricing: z
+    .object({
+      gstPercent: z.number().min(0).max(100).optional().default(0),
+      deliveryFeePaise: z.number().int().min(0).optional().default(0),
+      platformFeePaise: z.number().int().min(0).optional().default(0),
+      minOrderValuePaise: z.number().int().min(0).optional().default(0),
+      codEligible: z.boolean().optional().default(true),
+      codMaxAmountPaise: z.number().int().min(0).optional().default(50000),
+    })
+    .optional()
+    .default({}),
 });
 export type SettingsContentInput = z.infer<typeof settingsContentSchema>;

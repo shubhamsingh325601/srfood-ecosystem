@@ -1,5 +1,6 @@
 import { Router } from 'express';
 
+import { config } from '@/config/index';
 import { adminRoutes } from '@/modules/admin/admin.routes';
 import { analyticsRoutes } from '@/modules/analytics/analytics.routes';
 import { authRoutes } from '@/modules/auth/auth.routes';
@@ -21,13 +22,20 @@ import { adminUsersRoutes, usersRoutes } from '@/modules/users/users.routes';
 export const apiRouter = Router();
 
 apiRouter.get('/health', (_req, res) => {
-  res.status(200).json({ success: true, data: { status: 'ok', timestamp: new Date().toISOString() } });
+  res.status(200).json({ success: true, data: { status: 'ok', app: config.app.id, timestamp: new Date().toISOString() } });
 });
 
 apiRouter.use('/auth', authRoutes);
 apiRouter.use('/menu', menuRoutes);
-apiRouter.use('/stations', stationsRoutes);
-apiRouter.use('/trains', trainsRoutes);
+
+if (config.app.features.stations) {
+  apiRouter.use('/stations', stationsRoutes);
+}
+
+if (config.app.features.trains) {
+  apiRouter.use('/trains', trainsRoutes);
+}
+
 apiRouter.use('/coupons', couponsRoutes);
 apiRouter.use('/cart', cartRoutes);
 apiRouter.use('/payments', paymentsRoutes);
@@ -47,5 +55,9 @@ apiRouter.use('/admin/cms', adminCmsRoutes);
 apiRouter.use('/admin/analytics', analyticsRoutes);
 apiRouter.use('/admin/reports', reportsRoutes);
 apiRouter.use('/admin/ratings', adminRatingsRoutes);
-apiRouter.use('/admin/stations', adminStationsRoutes);
+
+if (config.app.features.stations) {
+  apiRouter.use('/admin/stations', adminStationsRoutes);
+}
+
 apiRouter.use('/admin', adminRoutes);

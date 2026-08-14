@@ -69,9 +69,13 @@ function CheckoutPage() {
   const deliveryTrainNumber = useDeliveryStore((s) => s.trainNumber);
   const currentUser = useAuthStore((s) => s.user);
   const nav = useNavigate();
-  const [payment, setPayment] = useState<"UPI" | "COD">("UPI");
+  const initialPayment = FEATURES.upiPayments ? "UPI" : "COD";
+  const [payment, setPayment] = useState<"UPI" | "COD">(initialPayment);
   const [placed, setPlaced] = useState<string | null>(null);
-  const [pendingPayment, setPendingPayment] = useState<{ orderId: string; upi: UpiPaymentInfo } | null>(null);
+  const [pendingPayment, setPendingPayment] = useState<{
+    orderId: string;
+    upi: UpiPaymentInfo;
+  } | null>(null);
   const [awaitingReturn, setAwaitingReturn] = useState(false);
   const [showConfirmPrompt, setShowConfirmPrompt] = useState(false);
   const [confirmChoice, setConfirmChoice] = useState<"yes" | null>(null);
@@ -357,7 +361,11 @@ function CheckoutPage() {
               <p className="text-xs text-muted-foreground">
                 Enter the reference number shown in your UPI app so we can confirm your order.
               </p>
-              <Button className="w-full rounded-full" onClick={confirmUpiPayment} disabled={confirming}>
+              <Button
+                className="w-full rounded-full"
+                onClick={confirmUpiPayment}
+                disabled={confirming}
+              >
                 {confirming ? "Confirming…" : "Confirm Order"}
               </Button>
             </div>

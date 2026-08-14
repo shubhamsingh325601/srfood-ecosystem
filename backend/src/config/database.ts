@@ -7,17 +7,21 @@ import { logger } from '@/utils/logger';
 
 mongoose.set('strictQuery', true);
 
-/**
- * Some local networks/VPNs point Node's default DNS resolver at a proxy that can't
- * answer the SRV/TXT lookups a `mongodb+srv://` URI needs, even though the OS resolver
- * and public DNS work fine. Prepending public resolvers (existing ones stay as fallback)
- * fixes that without touching system-wide DNS settings.
- */
 function ensureSrvResolvable(): void {
   if (!config.mongo.uri.startsWith('mongodb+srv://')) return;
   const current = getServers();
   const fallbacks = ['8.8.8.8', '1.1.1.1'].filter((ip) => !current.includes(ip));
   if (fallbacks.length) setServers([...fallbacks, ...current]);
+}
+
+function buildMongoUri(baseUri: string, dbName: string): string {
+  if (baseUri.includes('/') && baseUri.split('/').length > 3) {
+    const lastSegment = baseUri.split('/').pop()?.split('?')[0];
+    if (lastSegment && !lastSegment.includes('@')) {
+      return baseUri.replace(/\/[^/?]+(\?.*)?$/, `/${dbName}$1`);
+    }
+  }
+  return `${baseUri}/${dbName}`;
 }
 
 export async function connectDatabase(): Promise<typeof mongoose> {
@@ -29,8 +33,9 @@ export async function connectDatabase(): Promise<typeof mongoose> {
     logger.warn('MongoDB disconnected');
   });
 
-  const connection = await mongoose.connect(config.mongo.uri);
-  logger.info('MongoDB connected', { host: connection.connection.host, db: connection.connection.name });
+  const uri = buildMongoUri(config.mongo.uri, config.mongo.dbName);
+  const connection = await mongoose.connect(uri);
+  logger.info('MongoDB connected', { app: config.app.id, host: connection.connection.host, db: connection.connection.name });
   return connection;
 }
 

@@ -5,6 +5,10 @@ import { logger } from '@/utils/logger';
 
 /** Real MSG91 v2 SMS send API (https://api.msg91.com/api/v2/sendsms) — no mock fallback. */
 export async function sendSms(toMobile: string, message: string): Promise<void> {
+  if (!config.app.features.msg91Sms) {
+    return;
+  }
+
   try {
     await axios.post(
       'https://api.msg91.com/api/v2/sendsms',

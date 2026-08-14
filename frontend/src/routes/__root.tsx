@@ -15,7 +15,18 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Header } from "@/components/layout/Header";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { Footer } from "@/components/layout/Footer";
+import { FloatingCartBar } from "@/components/layout/FloatingCartBar";
 import { Toaster } from "@/components/ui/sonner";
+import {
+  APP_ID,
+  APP_DESCRIPTION,
+  APP_OG_DESCRIPTION,
+  APP_OG_TITLE,
+  APP_TAGLINE,
+  APP_TWITTER_DESCRIPTION,
+  APP_TWITTER_TITLE,
+  FEATURES,
+} from "@/lib/brand";
 
 function NotFoundComponent() {
   return (
@@ -67,26 +78,23 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "SRFOOD – Tasty Food, On Track" },
+      { title: `SRFOOD – ${APP_TAGLINE}` },
       {
         name: "description",
-        content:
-          "Order hygienic, fresh meals delivered to your train seat. Safar ka saath, swaad ke saath.",
+        content: APP_DESCRIPTION,
       },
-      { property: "og:title", content: "SRFOOD – Tasty Food, On Track" },
+      { property: "og:title", content: `SRFOOD – ${APP_TAGLINE}` },
       {
         property: "og:description",
-        content:
-          "Order hygienic, fresh meals delivered to your train seat. Safar ka saath, swaad ke saath.",
+        content: APP_DESCRIPTION,
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
 
-      { name: "twitter:title", content: "SRFOOD – Tasty Food, On Track" },
+      { name: "twitter:title", content: `SRFOOD – ${APP_TAGLINE}` },
       {
         name: "twitter:description",
-        content:
-          "Order hygienic, fresh meals delivered to your train seat. Safar ka saath, swaad ke saath.",
+        content: APP_DESCRIPTION,
       },
       {
         property: "og:image",
@@ -120,7 +128,7 @@ function RootShell({ children }: { children: ReactNode }) {
     return <>{children}</>;
   }
   return (
-    <html lang="en">
+    <html lang="en" data-theme={APP_THEME}>
       <head>
         <HeadContent />
       </head>
@@ -147,6 +155,7 @@ function RootComponent() {
           </main>
         </div>
         {!isAdmin && <Footer />}
+        {!isAdmin && FEATURES.floatingCartBar && <FloatingCartBar />}
         <Toaster />
       </div>
     </QueryClientProvider>

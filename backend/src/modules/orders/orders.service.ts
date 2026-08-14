@@ -1,4 +1,5 @@
 import { PRICING } from '@/config/constants';
+import { config } from '@/config/index';
 import type { OrderDocument } from '@/models/Order.model';
 import { cartService } from '@/modules/cart/cart.service';
 import { couponsService } from '@/modules/coupons/coupons.service';
@@ -53,6 +54,13 @@ async function assertOwnership(order: OrderDocument, userId: string): Promise<vo
   if (order.passengerId.toString() !== userId) throw new ForbiddenError('You do not have access to this order');
 }
 
+type TrainOrderInput = CreateOrderInput & { trainNumber?: string; pnr?: string; coach?: string; seat?: string; boardingStation?: string };
+type CityOrderInput = CreateOrderInput & { address?: string; landmark?: string };
+
+function isTrainInput(input: CreateOrderInput): input is TrainOrderInput {
+  return config.app.features.trains && 'trainNumber' in input;
+}
+
 export const ordersService = {
   async createOrder(userId: string, idempotencyKey: string, input: CreateOrderInput) {
     const existing = await ordersRepository.findByIdempotencyKey(idempotencyKey);
@@ -76,11 +84,18 @@ export const ordersService = {
     const order = await ordersRepository.create({
       orderId,
       passengerId: userId,
-      trainNumber: input.trainNumber,
-      pnr: input.pnr,
-      coach: input.coach,
-      seat: input.seat,
-      boardingStation: input.boardingStation,
+      ...(config.app.features.trains
+        ? {
+            trainNumber: (input as TrainOrderInput).trainNumber,
+            pnr: (input as TrainOrderInput).pnr,
+            coach: (input as TrainOrderInput).coach,
+            seat: (input as TrainOrderInput).seat,
+            boardingStation: (input as TrainOrderInput).boardingStation,
+          }
+        : {
+            address: (input as CityOrderInput).address,
+            landmark: (input as CityOrderInput).landmark,
+          }),
       deliveryStation: input.deliveryStation,
       items: validatedCart.items,
       subtotal: validatedCart.subtotal,

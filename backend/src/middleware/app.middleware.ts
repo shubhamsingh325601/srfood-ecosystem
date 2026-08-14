@@ -1,0 +1,15 @@
+import type { NextFunction, Request, Response } from 'express';
+
+import { config } from '@/config/index';
+import { ForbiddenError } from '@/utils/errors';
+
+export function appValidation(req: Request, _res: Response, next: NextFunction): void {
+  const appId = req.headers['x-app-id'];
+
+  if (!appId || typeof appId !== 'string' || appId !== config.app.id) {
+    next(new ForbiddenError(`Invalid or missing X-App-ID header. Expected: ${config.app.id}`));
+    return;
+  }
+
+  next();
+}

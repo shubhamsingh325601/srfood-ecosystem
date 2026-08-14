@@ -13,8 +13,9 @@ import { useAuthStore } from "@/store/authStore";
 import { useCartStore, selectCartCount } from "@/store/cartStore";
 import { useDeliveryStore } from "@/store/deliveryStore";
 import { getSettings } from "@/features/cms/services/cmsApi";
+import { FEATURES } from "@/lib/brand";
 
-const WHATSAPP_MESSAGE = "Hi, I need help with my SR Food order.";
+const WHATSAPP_MESSAGE = "Hi, I need help with my order.";
 
 function whatsAppLink(rawNumber: string): string {
   const digits = rawNumber.replace(/\D/g, "");
@@ -75,20 +76,26 @@ export function Header() {
           <Logo />
         </Link>
 
-        <button
-          type="button"
-          onClick={() => setTrainDialogOpen(true)}
-          className="hidden md:flex items-center gap-2 px-3 py-2 rounded-lg border hover:border-primary/40 hover:bg-accent transition text-left"
-        >
-          <MapPin className="w-4 h-4 text-primary" />
-          <div className="text-xs leading-tight">
-            <div className="text-muted-foreground">Delivery in</div>
-            <div className="font-semibold text-foreground">
-              {trainNumber ? `#${trainNumber}${trainName ? ` – ${trainName}` : ""}` : "Set your train"}
+        {FEATURES.trains && (
+          <button
+            type="button"
+            onClick={() => setTrainDialogOpen(true)}
+            className="hidden md:flex items-center gap-2 px-3 py-2 rounded-lg border hover:border-primary/40 hover:bg-accent transition text-left"
+          >
+            <MapPin className="w-4 h-4 text-primary" />
+            <div className="text-xs leading-tight">
+              <div className="text-muted-foreground">Delivery in</div>
+              <div className="font-semibold text-foreground">
+                {trainNumber
+                  ? `#${trainNumber}${trainName ? ` – ${trainName}` : ""}`
+                  : "Set your train"}
+              </div>
             </div>
-          </div>
-        </button>
-        <DeliveryTrainDialog open={trainDialogOpen} onOpenChange={setTrainDialogOpen} />
+          </button>
+        )}
+        {FEATURES.trains && (
+          <DeliveryTrainDialog open={trainDialogOpen} onOpenChange={setTrainDialogOpen} />
+        )}
 
         <form onSubmit={submit} className="flex-1 max-w-xl relative hidden sm:block">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />

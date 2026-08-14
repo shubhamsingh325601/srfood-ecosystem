@@ -10,7 +10,7 @@ export const swaggerSpec = swaggerJsdoc({
       title: 'SR Food API',
       version: '1.0.0',
       description:
-        'Railway food ordering platform API (ShreeRadheFood). All responses use the ' +
+        `${config.app.name} API. All responses use the ` +
         '`{ success, data }` / `{ success, error }` envelope shown in the schemas below. ' +
         'Click **Authorize** and paste an access token (from `POST /auth/login`) to try ' +
         'authenticated endpoints — monetary fields are integer paise (₹ = value / 100).',

@@ -1,6 +1,6 @@
 import { createHash } from 'crypto';
 
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 import { config } from '@/config/index';
 

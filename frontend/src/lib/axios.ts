@@ -1,6 +1,7 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
 
 import { useAuthStore } from "@/store/authStore";
+import { APP_ID } from "@/lib/brand";
 
 export interface ApiErrorBody {
   success: false;
@@ -15,6 +16,9 @@ api.interceptors.request.use((config) => {
   const token = useAuthStore.getState().accessToken;
   if (token) {
     config.headers.set("Authorization", `Bearer ${token}`);
+  }
+  if (APP_ID) {
+    config.headers.set("X-App-ID", APP_ID);
   }
   return config;
 });

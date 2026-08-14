@@ -5,6 +5,7 @@ import helmet from 'helmet';
 import swaggerUi from 'swagger-ui-express';
 
 import { config } from '@/config/index';
+import { appValidation } from '@/middleware/app.middleware';
 import { swaggerSpec } from '@/config/swagger';
 import { errorHandler, notFoundHandler } from '@/middleware/errorHandler';
 import { publicRateLimiter } from '@/middleware/rateLimiter';
@@ -31,6 +32,8 @@ export function createApp(): Express {
   if (config.swagger.enabled && !config.app.isProduction) {
     app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
   }
+
+  app.use(appValidation);
 
   app.use(`/api/${config.app.apiVersion}`, apiRouter);
 
