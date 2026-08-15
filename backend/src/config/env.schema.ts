@@ -6,6 +6,7 @@ const envSchema = z.object({
   API_VERSION: z.string().default('v1'),
 
   APP_ID: z.string().min(1, 'APP_ID is required').regex(/^[a-z0-9-]+$/, 'APP_ID must be lowercase alphanumeric with hyphens only'),
+  APP_ALLOWED_IDS: z.string().optional().default(''),
   APP_SECRET: z.string().min(32, 'APP_SECRET must be at least 32 characters'),
   APP_NAME: z.string().min(1, 'APP_NAME is required'),
   APP_TAGLINE: z.string().min(1, 'APP_TAGLINE is required'),

@@ -14,6 +14,7 @@ export const config = {
     isProduction: env.NODE_ENV === 'production',
     isTest: env.NODE_ENV === 'test',
     id: env.APP_ID,
+    allowedIds: env.APP_ALLOWED_IDS ? env.APP_ALLOWED_IDS.split(',').map((s) => s.trim()) : [env.APP_ID],
     name: env.APP_NAME,
     tagline: env.APP_TAGLINE,
     description: env.APP_DESCRIPTION,
