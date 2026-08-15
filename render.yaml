@@ -85,6 +85,12 @@ services:
         value: Tasty Food, On Track
       - key: VITE_APP_DESCRIPTION
         value: Order hygienic, fresh meals delivered to your train seat. Safar ka saath, swaad ke saath.
+      - key: VITE_APP_OG_TITLE
+        value: SRFOOD – Tasty Food, On Track
+      - key: VITE_APP_OG_DESCRIPTION
+        value: Order hygienic, fresh meals delivered to your train seat. Safar ka saath, swaad ke saath.
+      - key: VITE_APP_FAVICON
+        value: favicon.png
       - key: VITE_APP_THEME
         value: orange
       - key: VITE_FEATURE_TRAINS
@@ -118,14 +124,22 @@ services:
       - key: VITE_APP_TAGLINE
         value: Tasty Food, Delivered
       - key: VITE_APP_DESCRIPTION
-        value: Order hygienic, fresh meals delivered to your seat. Shree Radhe Foods.
+        value: Order hygienic, fresh meals delivered fast in Kota & Sawai Madhopur.
+      - key: VITE_APP_OG_TITLE
+        value: Shree Radhe Foods – Tasty Food, Delivered
+      - key: VITE_APP_OG_DESCRIPTION
+        value: Order hygienic, fresh meals delivered fast in Kota & Sawai Madhopur.
+      - key: VITE_APP_FAVICON
+        value: favicon.jpg
+      - key: VITE_APP_SERVICE_AREA
+        value: Kota & Sawai Madhopur
       - key: VITE_APP_THEME
         value: red
       - key: VITE_FEATURE_TRAINS
-        value: "true"
+        value: "false"
       - key: VITE_FEATURE_STATIONS
-        value: "true"
+        value: "false"
       - key: VITE_FEATURE_UPI_PAYMENTS
         value: "true"
       - key: VITE_FEATURE_FLOATING_CART_BAR
-        value: "false"
+        value: "true"
