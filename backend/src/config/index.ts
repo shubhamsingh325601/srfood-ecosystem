@@ -10,6 +10,11 @@ const APP_DB_NAME_MAP: Record<string, string> = {
   shreeradhefood: 'shreeRadhefood',
 };
 
+/** Per-app overrides for feature flags that legitimately differ between apps sharing this backend (e.g. shreeradhefood has no trains/stations). Unlisted apps fall back to the env-derived defaults below. */
+const APP_FEATURE_OVERRIDES: Record<string, Partial<{ trains: boolean; stations: boolean }>> = {
+  shreeradhefood: { trains: false, stations: false },
+};
+
 export const config = {
   app: {
     nodeEnv: env.NODE_ENV,
@@ -36,7 +41,11 @@ export const config = {
       sendgridEmail: env.FEATURE_SENDGRID_EMAIL,
       twilioSms: env.FEATURE_TWILIO_SMS,
       msg91Sms: env.FEATURE_MSG91_SMS,
-    } as const,
+    },
+    /** Resolves trains/stations feature flags for a specific app id, honoring APP_FEATURE_OVERRIDES. Use this instead of `features` when handling a request (per-app, not process-wide). */
+    featuresForApp(appId: string) {
+      return { ...this.features, ...APP_FEATURE_OVERRIDES[appId] };
+    },
   },
   mongo: {
     uri: env.MONGO_URI,

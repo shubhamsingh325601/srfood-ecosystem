@@ -1,6 +1,7 @@
 import { Router } from 'express';
 
 import { config } from '@/config/index';
+import { requireFeature } from '@/middleware/feature.middleware';
 import { adminRoutes } from '@/modules/admin/admin.routes';
 import { analyticsRoutes } from '@/modules/analytics/analytics.routes';
 import { authRoutes } from '@/modules/auth/auth.routes';
@@ -28,13 +29,8 @@ apiRouter.get('/health', (_req, res) => {
 apiRouter.use('/auth', authRoutes);
 apiRouter.use('/menu', menuRoutes);
 
-if (config.app.features.stations) {
-  apiRouter.use('/stations', stationsRoutes);
-}
-
-if (config.app.features.trains) {
-  apiRouter.use('/trains', trainsRoutes);
-}
+apiRouter.use('/stations', requireFeature('stations'), stationsRoutes);
+apiRouter.use('/trains', requireFeature('trains'), trainsRoutes);
 
 apiRouter.use('/coupons', couponsRoutes);
 apiRouter.use('/cart', cartRoutes);
@@ -56,8 +52,6 @@ apiRouter.use('/admin/analytics', analyticsRoutes);
 apiRouter.use('/admin/reports', reportsRoutes);
 apiRouter.use('/admin/ratings', adminRatingsRoutes);
 
-if (config.app.features.stations) {
-  apiRouter.use('/admin/stations', adminStationsRoutes);
-}
+apiRouter.use('/admin/stations', requireFeature('stations'), adminStationsRoutes);
 
 apiRouter.use('/admin', adminRoutes);

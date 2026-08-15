@@ -7,8 +7,8 @@ import { UserRole } from '@/types/domain.types';
 
 import { ordersController } from './orders.controller';
 import {
+  buildCreateOrderSchema,
   cancelOrderSchema,
-  createOrderSchema,
   listAdminOrdersSchema,
   listOrdersSchema,
   orderIdParamSchema,
@@ -93,7 +93,7 @@ export const ordersRoutes = Router();
  *             schema: { $ref: '#/components/schemas/ErrorResponse' }
  *       '422': { $ref: '#/components/responses/ValidationError' }
  */
-ordersRoutes.post('/', requireAuth, validate({ body: createOrderSchema }), ordersController.create);
+ordersRoutes.post('/', requireAuth, validate({ body: () => buildCreateOrderSchema() }), ordersController.create);
 
 /**
  * @openapi

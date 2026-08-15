@@ -1,5 +1,5 @@
 import { PRICING } from '@/config/constants';
-import { config } from '@/config/index';
+import { getCurrentAppFeatures } from '@/config/dbContext';
 import type { OrderDocument } from '@/models/Order.model';
 import { cartService } from '@/modules/cart/cart.service';
 import { couponsService } from '@/modules/coupons/coupons.service';
@@ -58,7 +58,7 @@ type TrainOrderInput = CreateOrderInput & { trainNumber?: string; pnr?: string; 
 type CityOrderInput = CreateOrderInput & { address?: string; landmark?: string };
 
 function isTrainInput(input: CreateOrderInput): input is TrainOrderInput {
-  return config.app.features.trains && 'trainNumber' in input;
+  return getCurrentAppFeatures().trains && 'trainNumber' in input;
 }
 
 export const ordersService = {
@@ -84,7 +84,7 @@ export const ordersService = {
     const order = await ordersRepository.create({
       orderId,
       passengerId: userId,
-      ...(config.app.features.trains
+      ...(getCurrentAppFeatures().trains
         ? {
             trainNumber: (input as TrainOrderInput).trainNumber,
             pnr: (input as TrainOrderInput).pnr,

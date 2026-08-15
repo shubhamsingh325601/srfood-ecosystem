@@ -15,3 +15,7 @@ export function getCurrentAppId(): string {
 export function withAppId<T>(appId: string, fn: () => T): T {
   return appIdStorage.run(appId, fn);
 }
+
+export function getCurrentAppFeatures(): (typeof config.app.features) {
+  return config.app.featuresForApp(getCurrentAppId());
+}
