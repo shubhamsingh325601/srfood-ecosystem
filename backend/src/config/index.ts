@@ -6,6 +6,10 @@ import { parseEnv } from '@/config/env.schema';
 
 const env = parseEnv(process.env);
 
+const APP_DB_NAME_MAP: Record<string, string> = {
+  shreeradhefood: 'shreeRadhefood',
+};
+
 export const config = {
   app: {
     nodeEnv: env.NODE_ENV,
@@ -37,6 +41,11 @@ export const config = {
   mongo: {
     uri: env.MONGO_URI,
     dbName: env.MONGO_DB_NAME || env.APP_ID.replace(/-/g, '_') + '_db',
+    /** Maps an app id to its MongoDB database name (DB names may differ from the lowercase app id). */
+    dbNameForApp: (appId: string): string => {
+      if (appId === config.app.id && env.MONGO_DB_NAME) return env.MONGO_DB_NAME;
+      return APP_DB_NAME_MAP[appId] ?? appId;
+    },
   },
   jwt: {
     accessSecret: env.JWT_ACCESS_SECRET,

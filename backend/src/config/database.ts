@@ -32,7 +32,7 @@ function buildMongoUri(baseUri: string, dbName: string): string {
 export function getConnection(appId: string): Connection {
   let conn = connections.get(appId);
   if (!conn) {
-    conn = mongoose.createConnection(buildMongoUri(config.mongo.uri, appId));
+    conn = mongoose.createConnection(buildMongoUri(config.mongo.uri, config.mongo.dbNameForApp(appId)));
     conn.on('error', (error: unknown) => {
       logger.error('MongoDB connection error', { app: appId, error: error instanceof Error ? error.message : error });
     });
