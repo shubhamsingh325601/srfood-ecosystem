@@ -4,6 +4,11 @@ import { config } from '@/config/index';
 import { ForbiddenError } from '@/utils/errors';
 
 export function appValidation(req: Request, _res: Response, next: NextFunction): void {
+  if (req.path === `/api/${config.app.apiVersion}/health`) {
+    next();
+    return;
+  }
+
   const appId = req.headers['x-app-id'];
 
   if (!appId || typeof appId !== 'string' || !config.app.allowedIds.includes(appId)) {
