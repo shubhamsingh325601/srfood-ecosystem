@@ -100,7 +100,7 @@ services:
       - key: VITE_FEATURE_UPI_PAYMENTS
         value: "true"
       - key: VITE_FEATURE_FLOATING_CART_BAR
-        value: "false"
+        value: "true"
 
   - type: web
     name: shreeradhefood-frontend

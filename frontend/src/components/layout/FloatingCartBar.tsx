@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/Button";
 export function FloatingCartBar() {
   const count = useCartStore(selectCartCount);
   const total = useCartStore(selectCartTotal);
-  const items = useCartStore((s) => s.items);
 
   if (count === 0) return null;
 
@@ -15,9 +14,9 @@ export function FloatingCartBar() {
       <div className="bg-card border rounded-2xl shadow-pop p-4 flex items-center gap-4">
         <div className="flex-1 min-w-0">
           <div className="text-sm font-semibold truncate">
-            {items.length} item{count !== 1 ? "s" : ""} in cart
+            {count} item{count !== 1 ? "s" : ""} in cart
           </div>
-          <div className="text-lg font-bold text-primary">₹{(total / 100).toFixed(2)}</div>
+          <div className="text-lg font-bold text-primary">₹{total}</div>
         </div>
         <Button asChild size="sm" className="rounded-full h-10 px-5">
           <Link to="/checkout">
