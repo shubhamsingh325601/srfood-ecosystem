@@ -1,5 +1,5 @@
 import type { Types } from 'mongoose';
-import { Schema, model } from 'mongoose';
+import { Schema } from 'mongoose';
 
 export interface TrainStop {
   stationCode: string;
@@ -36,7 +36,7 @@ const trainStopSchema = new Schema<TrainStop>(
   { _id: false },
 );
 
-const trainScheduleSchema = new Schema<TrainScheduleDocument>(
+export const trainScheduleSchema = new Schema<TrainScheduleDocument>(
   {
     trainNumber: { type: String, required: true, unique: true, trim: true },
     trainName: { type: String, required: true },
@@ -51,5 +51,3 @@ const trainScheduleSchema = new Schema<TrainScheduleDocument>(
 );
 
 trainScheduleSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
-
-export const TrainSchedule = model<TrainScheduleDocument>('TrainSchedule', trainScheduleSchema);

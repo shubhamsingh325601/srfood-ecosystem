@@ -1,13 +1,13 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 
-import { connectDatabase, disconnectDatabase } from '@/config/database';
-import { Category } from '@/models/Category.model';
-import { CmsContent } from '@/models/CmsContent.model';
-import { Coupon } from '@/models/Coupon.model';
-import { MenuItem } from '@/models/MenuItem.model';
-import { Station } from '@/models/Station.model';
-import { User } from '@/models/User.model';
+import { connectDatabase, disconnectDatabase, getModel } from '@/config/database';
+import type { CategoryDocument } from '@/models/Category.model';
+import type { CmsContentDocument } from '@/models/CmsContent.model';
+import type { CouponDocument } from '@/models/Coupon.model';
+import type { MenuItemDocument } from '@/models/MenuItem.model';
+import type { StationDocument } from '@/models/Station.model';
+import type { UserDocument } from '@/models/User.model';
 import { uploadImageBuffer } from '@/services/cloudinary.service';
 import { CmsContentType, CouponDiscountType, UserRole } from '@/types/domain.types';
 import { hashPassword } from '@/utils/hash';
@@ -174,6 +174,7 @@ const STATION_SEEDS: StationSeed[] = [
 ];
 
 async function seedCategories(): Promise<Map<string, string>> {
+  const Category = getModel<CategoryDocument>('Category');
   const slugToId = new Map<string, string>();
   for (const seed of CATEGORY_SEEDS) {
     const imageUrl = await uploadFrontendAsset(seed.assetFile, 'srfood/categories');
@@ -189,6 +190,7 @@ async function seedCategories(): Promise<Map<string, string>> {
 }
 
 async function seedMenuItems(categoryIdBySlug: Map<string, string>): Promise<void> {
+  const MenuItem = getModel<MenuItemDocument>('MenuItem');
   for (const seed of MENU_ITEM_SEEDS) {
     const categoryId = categoryIdBySlug.get(seed.categorySlug);
     if (!categoryId) throw new Error(`Category not seeded: ${seed.categorySlug}`);
@@ -216,6 +218,7 @@ async function seedMenuItems(categoryIdBySlug: Map<string, string>): Promise<voi
 }
 
 async function seedStations(): Promise<void> {
+  const Station = getModel<StationDocument>('Station');
   for (const seed of STATION_SEEDS) {
     await Station.findOneAndUpdate(
       { code: seed.code },
@@ -227,6 +230,7 @@ async function seedStations(): Promise<void> {
 }
 
 async function seedCoupons(): Promise<void> {
+  const Coupon = getModel<CouponDocument>('Coupon');
   const oneYearFromNow = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
   const coupons = [
     {
@@ -275,6 +279,7 @@ async function seedCoupons(): Promise<void> {
 }
 
 async function seedCmsContent(): Promise<void> {
+  const CmsContent = getModel<CmsContentDocument>('CmsContent');
   const entries: { type: CmsContentType; data: unknown }[] = [
     {
       type: CmsContentType.HOMEPAGE,
@@ -337,6 +342,7 @@ async function seedCmsContent(): Promise<void> {
 }
 
 async function seedSuperAdmin(): Promise<void> {
+  const User = getModel<UserDocument>('User');
   const email = process.env.SEED_ADMIN_EMAIL ?? 'admin@srfood.example';
   const mobile = process.env.SEED_ADMIN_MOBILE ?? '9000000000';
   const password = process.env.SEED_ADMIN_PASSWORD ?? 'Admin@12345';

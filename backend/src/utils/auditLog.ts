@@ -1,6 +1,7 @@
 import type { Types } from 'mongoose';
 
-import { AuditLog } from '@/models/AuditLog.model';
+import { getModel } from '@/config/database';
+import type { AuditLogDocument } from '@/models/AuditLog.model';
 
 export interface RecordAuditLogInput {
   actorId: Types.ObjectId | string;
@@ -15,6 +16,7 @@ export interface RecordAuditLogInput {
 
 /** Every admin-mutating action must call this — CLAUDE.md §4 "no exceptions" rule. */
 export async function recordAuditLog(input: RecordAuditLogInput): Promise<void> {
+  const AuditLog = getModel<AuditLogDocument>('AuditLog');
   await AuditLog.create({
     actorId: input.actorId,
     actorRole: input.actorRole,

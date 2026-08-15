@@ -1,5 +1,5 @@
 import type { Types } from 'mongoose';
-import { Schema, model } from 'mongoose';
+import { Schema } from 'mongoose';
 
 export interface InvoiceDocument {
   _id: Types.ObjectId;
@@ -19,7 +19,7 @@ export interface InvoiceDocument {
   updatedAt: Date;
 }
 
-const invoiceSchema = new Schema<InvoiceDocument>(
+export const invoiceSchema = new Schema<InvoiceDocument>(
   {
     orderId: { type: Schema.Types.ObjectId, ref: 'Order', required: true, unique: true },
     invoiceNumber: { type: String, required: true, unique: true },
@@ -36,5 +36,3 @@ const invoiceSchema = new Schema<InvoiceDocument>(
   },
   { timestamps: true },
 );
-
-export const Invoice = model<InvoiceDocument>('Invoice', invoiceSchema);

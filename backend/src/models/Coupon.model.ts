@@ -1,5 +1,5 @@
 import type { Types } from 'mongoose';
-import { Schema, model } from 'mongoose';
+import { Schema } from 'mongoose';
 
 import { CouponDiscountType } from '@/types/domain.types';
 
@@ -23,7 +23,7 @@ export interface CouponDocument {
   updatedAt: Date;
 }
 
-const couponSchema = new Schema<CouponDocument>(
+export const couponSchema = new Schema<CouponDocument>(
   {
     code: { type: String, required: true, unique: true, uppercase: true, trim: true },
     description: { type: String, required: true },
@@ -42,5 +42,3 @@ const couponSchema = new Schema<CouponDocument>(
   },
   { timestamps: true },
 );
-
-export const Coupon = model<CouponDocument>('Coupon', couponSchema);

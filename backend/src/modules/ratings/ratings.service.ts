@@ -1,5 +1,6 @@
 import { RATING } from '@/config/constants';
-import { Order } from '@/models/Order.model';
+import { getModel } from '@/config/database';
+import type { OrderDocument } from '@/models/Order.model';
 import { OrderStatus } from '@/types/domain.types';
 import { BadRequestError, ForbiddenError, NotFoundError } from '@/utils/errors';
 import { buildPaginationMeta } from '@/utils/responseFormatter';
@@ -11,6 +12,7 @@ const RATEABLE_STATUSES: OrderStatus[] = [OrderStatus.DELIVERED, OrderStatus.COM
 
 export const ratingsService = {
   async create(userId: string, input: CreateRatingInput) {
+    const Order = getModel<OrderDocument>('Order');
     const order = await Order.findOne({ _id: input.orderId, isDeleted: false });
     if (!order) throw new NotFoundError('Order not found');
     if (order.passengerId.toString() !== userId) throw new ForbiddenError('You can only rate your own orders');

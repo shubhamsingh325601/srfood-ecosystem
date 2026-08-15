@@ -1,5 +1,5 @@
 import type { Types } from 'mongoose';
-import { Schema, model } from 'mongoose';
+import { Schema } from 'mongoose';
 
 import { NotificationChannel, NotificationEvent } from '@/types/domain.types';
 
@@ -21,7 +21,7 @@ export interface NotificationDocument {
   updatedAt: Date;
 }
 
-const notificationSchema = new Schema<NotificationDocument>(
+export const notificationSchema = new Schema<NotificationDocument>(
   {
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     event: { type: String, enum: Object.values(NotificationEvent), required: true },
@@ -41,5 +41,3 @@ const notificationSchema = new Schema<NotificationDocument>(
 
 notificationSchema.index({ userId: 1, createdAt: -1 });
 notificationSchema.index({ userId: 1, isRead: 1 });
-
-export const Notification = model<NotificationDocument>('Notification', notificationSchema);

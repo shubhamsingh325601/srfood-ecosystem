@@ -1,5 +1,5 @@
 import type { Types } from 'mongoose';
-import { Schema, model } from 'mongoose';
+import { Schema } from 'mongoose';
 
 import { UserRole } from '@/types/domain.types';
 
@@ -33,7 +33,7 @@ export interface UserDocument {
   updatedAt: Date;
 }
 
-const userSchema = new Schema<UserDocument>(
+export const userSchema = new Schema<UserDocument>(
   {
     name: { type: String, required: true, trim: true, minlength: 2, maxlength: 80 },
     email: { type: String, unique: true, sparse: true, lowercase: true, trim: true },
@@ -60,5 +60,3 @@ const userSchema = new Schema<UserDocument>(
 );
 
 userSchema.index({ role: 1 });
-
-export const User = model<UserDocument>('User', userSchema);

@@ -1,5 +1,5 @@
 import type { Types } from 'mongoose';
-import { Schema, model } from 'mongoose';
+import { Schema } from 'mongoose';
 
 import { PaymentMethod, PaymentStatus } from '@/types/domain.types';
 
@@ -40,7 +40,7 @@ const refundSchema = new Schema<RefundRecord>(
   { _id: false },
 );
 
-const paymentSchema = new Schema<PaymentDocument>(
+export const paymentSchema = new Schema<PaymentDocument>(
   {
     orderId: { type: Schema.Types.ObjectId, ref: 'Order', required: true, index: true },
     transactionRef: { type: String, unique: true, sparse: true },
@@ -55,5 +55,3 @@ const paymentSchema = new Schema<PaymentDocument>(
   },
   { timestamps: true },
 );
-
-export const Payment = model<PaymentDocument>('Payment', paymentSchema);

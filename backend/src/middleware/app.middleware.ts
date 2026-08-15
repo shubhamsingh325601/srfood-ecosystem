@@ -1,11 +1,12 @@
 import type { NextFunction, Request, Response } from 'express';
 
+import { withAppId } from '@/config/dbContext';
 import { config } from '@/config/index';
 import { ForbiddenError } from '@/utils/errors';
 
 export function appValidation(req: Request, _res: Response, next: NextFunction): void {
   if (req.path === `/api/${config.app.apiVersion}/health`) {
-    next();
+    withAppId(config.app.id, () => next());
     return;
   }
 
@@ -16,5 +17,5 @@ export function appValidation(req: Request, _res: Response, next: NextFunction):
     return;
   }
 
-  next();
+  withAppId(appId, () => next());
 }

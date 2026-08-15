@@ -1,5 +1,5 @@
 import type { Types } from 'mongoose';
-import { Schema, model } from 'mongoose';
+import { Schema } from 'mongoose';
 
 import { OrderStatus, PaymentMethod, PaymentMode, PaymentStatus } from '@/types/domain.types';
 
@@ -88,7 +88,7 @@ const statusHistorySchema = new Schema<OrderStatusHistoryEntry>(
   { _id: false },
 );
 
-const orderSchema = new Schema<OrderDocument>(
+export const orderSchema = new Schema<OrderDocument>(
   {
     orderId: { type: String, required: true, unique: true },
     passengerId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
@@ -123,5 +123,3 @@ const orderSchema = new Schema<OrderDocument>(
 
 orderSchema.index({ passengerId: 1, createdAt: -1 });
 orderSchema.index({ status: 1 });
-
-export const Order = model<OrderDocument>('Order', orderSchema);

@@ -1,5 +1,6 @@
-import { Order } from '@/models/Order.model';
-import { User } from '@/models/User.model';
+import { getModel } from '@/config/database';
+import type { OrderDocument } from '@/models/Order.model';
+import type { UserDocument } from '@/models/User.model';
 import { uploadRawBuffer } from '@/services/cloudinary.service';
 import { generateInvoicePdf } from '@/services/pdf.service';
 import { ForbiddenError, NotFoundError } from '@/utils/errors';
@@ -8,6 +9,9 @@ import { invoicesRepository } from './invoices.repository';
 
 export const invoicesService = {
   async getOrGenerate(orderIdOrHumanId: string, userId: string) {
+    const Order = getModel<OrderDocument>('Order');
+    const User = getModel<UserDocument>('User');
+
     const order = /^[a-f0-9]{24}$/i.test(orderIdOrHumanId)
       ? await Order.findOne({ _id: orderIdOrHumanId, isDeleted: false })
       : await Order.findOne({ orderId: orderIdOrHumanId, isDeleted: false });

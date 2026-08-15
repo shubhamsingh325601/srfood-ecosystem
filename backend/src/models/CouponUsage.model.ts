@@ -1,5 +1,5 @@
 import type { Types } from 'mongoose';
-import { Schema, model } from 'mongoose';
+import { Schema } from 'mongoose';
 
 export interface CouponUsageDocument {
   _id: Types.ObjectId;
@@ -10,7 +10,7 @@ export interface CouponUsageDocument {
   createdAt: Date;
 }
 
-const couponUsageSchema = new Schema<CouponUsageDocument>(
+export const couponUsageSchema = new Schema<CouponUsageDocument>(
   {
     couponId: { type: Schema.Types.ObjectId, ref: 'Coupon', required: true },
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
@@ -21,5 +21,3 @@ const couponUsageSchema = new Schema<CouponUsageDocument>(
 );
 
 couponUsageSchema.index({ couponId: 1, userId: 1 });
-
-export const CouponUsage = model<CouponUsageDocument>('CouponUsage', couponUsageSchema);

@@ -1,13 +1,18 @@
 import type { FilterQuery } from 'mongoose';
 
-import { AuditLog, type AuditLogDocument } from '@/models/AuditLog.model';
-import { MenuItem } from '@/models/MenuItem.model';
-import { Order } from '@/models/Order.model';
-import { User } from '@/models/User.model';
+import { getModel } from '@/config/database';
+import type { AuditLogDocument } from '@/models/AuditLog.model';
+import type { MenuItemDocument } from '@/models/MenuItem.model';
+import type { OrderDocument } from '@/models/Order.model';
+import type { UserDocument } from '@/models/User.model';
 import { OrderDisplayStatus, ORDER_STATUS_DISPLAY_MAP, PaymentStatus } from '@/types/domain.types';
 
 export const adminRepository = {
   async dashboardSummary() {
+    const Order = getModel<OrderDocument>('Order');
+    const User = getModel<UserDocument>('User');
+    const MenuItem = getModel<MenuItemDocument>('MenuItem');
+
     const [revenueAgg, orderCount, pendingStatuses, userCount, menuItemCount, recentOrders] = await Promise.all([
       Order.aggregate<{ total: number }>([
         { $match: { isDeleted: false, paymentStatus: PaymentStatus.CAPTURED } },
@@ -36,6 +41,7 @@ export const adminRepository = {
   },
 
   async listAuditLogs(filters: { entityType?: string; action?: string }, skip: number, limit: number) {
+    const AuditLog = getModel<AuditLogDocument>('AuditLog');
     const query: FilterQuery<AuditLogDocument> = {};
     if (filters.entityType) query.entityType = filters.entityType;
     if (filters.action) query.action = filters.action;
@@ -47,6 +53,7 @@ export const adminRepository = {
   },
 
   async roleCounts() {
+    const User = getModel<UserDocument>('User');
     return User.aggregate<{ _id: string; count: number }>([
       { $match: { isDeleted: false } },
       { $group: { _id: '$role', count: { $sum: 1 } } },

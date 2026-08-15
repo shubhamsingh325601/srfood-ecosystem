@@ -1,5 +1,5 @@
 import type { Types } from 'mongoose';
-import { Schema, model } from 'mongoose';
+import { Schema } from 'mongoose';
 
 export interface AuditLogDocument {
   actorId: Types.ObjectId;
@@ -14,7 +14,7 @@ export interface AuditLogDocument {
 }
 
 /** Immutable, 5-year retention per PRD §11.20 — no updatedAt/isDeleted; never mutated after creation. */
-const auditLogSchema = new Schema<AuditLogDocument>(
+export const auditLogSchema = new Schema<AuditLogDocument>(
   {
     actorId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
     actorRole: { type: String, required: true },
@@ -29,5 +29,3 @@ const auditLogSchema = new Schema<AuditLogDocument>(
 );
 
 auditLogSchema.index({ createdAt: -1 });
-
-export const AuditLog = model<AuditLogDocument>('AuditLog', auditLogSchema);

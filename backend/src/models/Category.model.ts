@@ -1,5 +1,5 @@
 import type { Types } from 'mongoose';
-import { Schema, model } from 'mongoose';
+import { Schema } from 'mongoose';
 
 export interface CategoryDocument {
   _id: Types.ObjectId;
@@ -15,7 +15,7 @@ export interface CategoryDocument {
   updatedAt: Date;
 }
 
-const categorySchema = new Schema<CategoryDocument>(
+export const categorySchema = new Schema<CategoryDocument>(
   {
     name: { type: String, required: true, trim: true, maxlength: 60 },
     slug: { type: String, required: true, unique: true, lowercase: true, trim: true },
@@ -28,5 +28,3 @@ const categorySchema = new Schema<CategoryDocument>(
   },
   { timestamps: true },
 );
-
-export const Category = model<CategoryDocument>('Category', categorySchema);

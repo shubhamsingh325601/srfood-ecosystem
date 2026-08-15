@@ -1,5 +1,5 @@
 import type { Types } from 'mongoose';
-import { Schema, model } from 'mongoose';
+import { Schema } from 'mongoose';
 
 export interface StationDocument {
   _id: Types.ObjectId;
@@ -11,7 +11,7 @@ export interface StationDocument {
   updatedAt: Date;
 }
 
-const stationSchema = new Schema<StationDocument>(
+export const stationSchema = new Schema<StationDocument>(
   {
     name: { type: String, required: true, trim: true, maxlength: 100 },
     code: { type: String, trim: true, uppercase: true, maxlength: 10 },
@@ -23,5 +23,3 @@ const stationSchema = new Schema<StationDocument>(
 
 stationSchema.index({ code: 1 }, { unique: true, sparse: true });
 stationSchema.index({ name: 1 });
-
-export const Station = model<StationDocument>('Station', stationSchema);

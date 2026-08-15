@@ -1,6 +1,7 @@
 import type { NextFunction, Request, Response } from 'express';
 
-import { User } from '@/models/User.model';
+import { getModel } from '@/config/database';
+import type { UserDocument } from '@/models/User.model';
 import { UnauthorizedError } from '@/utils/errors';
 import { verifyAccessToken } from '@/utils/jwt';
 
@@ -18,6 +19,7 @@ export async function requireAuth(req: Request, _res: Response, next: NextFuncti
 
     const payload = verifyAccessToken(token);
 
+    const User = getModel<UserDocument>('User');
     const user = await User.findById(payload.sub).select('role isBlocked isDeleted').lean();
     if (!user || user.isDeleted) throw new UnauthorizedError('User no longer exists');
     if (user.isBlocked) throw new UnauthorizedError('Account is blocked');
@@ -45,6 +47,7 @@ export async function optionalAuth(req: Request, _res: Response, next: NextFunct
   }
   try {
     const payload = verifyAccessToken(token);
+    const User = getModel<UserDocument>('User');
     const user = await User.findById(payload.sub).select('role isBlocked isDeleted').lean();
     if (user && !user.isDeleted && !user.isBlocked) {
       req.user = { id: payload.sub, role: user.role };

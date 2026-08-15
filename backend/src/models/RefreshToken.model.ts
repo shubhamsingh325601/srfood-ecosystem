@@ -1,5 +1,5 @@
 import type { Types } from 'mongoose';
-import { Schema, model } from 'mongoose';
+import { Schema } from 'mongoose';
 
 export interface RefreshTokenDocument {
   _id: Types.ObjectId;
@@ -13,7 +13,7 @@ export interface RefreshTokenDocument {
   createdAt: Date;
 }
 
-const refreshTokenSchema = new Schema<RefreshTokenDocument>(
+export const refreshTokenSchema = new Schema<RefreshTokenDocument>(
   {
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
     tokenHash: { type: String, required: true, unique: true },
@@ -27,5 +27,3 @@ const refreshTokenSchema = new Schema<RefreshTokenDocument>(
 );
 
 refreshTokenSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
-
-export const RefreshToken = model<RefreshTokenDocument>('RefreshToken', refreshTokenSchema);

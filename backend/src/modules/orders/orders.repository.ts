@@ -1,6 +1,7 @@
 import type { FilterQuery } from 'mongoose';
 
-import { Order, type OrderDocument } from '@/models/Order.model';
+import { getModel } from '@/config/database';
+import type { OrderDocument } from '@/models/Order.model';
 import type { OrderStatus } from '@/types/domain.types';
 
 function isObjectIdLike(value: string): boolean {
@@ -16,18 +17,22 @@ export interface AppendStatusEntry {
 
 export const ordersRepository = {
   async findByIdempotencyKey(idempotencyKey: string) {
+    const Order = getModel<OrderDocument>('Order');
     return Order.findOne({ idempotencyKey });
   },
 
   async create(data: Record<string, unknown>) {
+    const Order = getModel<OrderDocument>('Order');
     return Order.create(data);
   },
 
   async findByIdOrOrderId(idOrOrderId: string) {
+    const Order = getModel<OrderDocument>('Order');
     return isObjectIdLike(idOrOrderId) ? Order.findOne({ _id: idOrOrderId, isDeleted: false }) : Order.findOne({ orderId: idOrOrderId, isDeleted: false });
   },
 
   async listForUser(passengerId: string, status: OrderStatus | undefined, skip: number, limit: number) {
+    const Order = getModel<OrderDocument>('Order');
     const query: FilterQuery<OrderDocument> = { passengerId, isDeleted: false };
     if (status) query.status = status;
     const [items, total] = await Promise.all([
@@ -38,6 +43,7 @@ export const ordersRepository = {
   },
 
   async listForAdmin(filters: { status?: OrderStatus; passengerId?: string }, skip: number, limit: number) {
+    const Order = getModel<OrderDocument>('Order');
     const query: FilterQuery<OrderDocument> = { isDeleted: false };
     if (filters.status) query.status = filters.status;
     if (filters.passengerId) query.passengerId = filters.passengerId;
@@ -49,6 +55,7 @@ export const ordersRepository = {
   },
 
   async appendStatus(orderId: string, entry: AppendStatusEntry, extra: Record<string, unknown> = {}) {
+    const Order = getModel<OrderDocument>('Order');
     return Order.findByIdAndUpdate(
       orderId,
       { status: entry.status, $push: { statusHistory: entry }, ...extra },

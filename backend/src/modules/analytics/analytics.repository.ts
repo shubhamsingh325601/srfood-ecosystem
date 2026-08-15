@@ -1,4 +1,5 @@
-import { Order } from '@/models/Order.model';
+import { getModel } from '@/config/database';
+import type { OrderDocument } from '@/models/Order.model';
 import { OrderStatus, PaymentStatus } from '@/types/domain.types';
 
 function dateFilter(from?: Date, to?: Date) {
@@ -10,6 +11,7 @@ function dateFilter(from?: Date, to?: Date) {
 
 export const analyticsRepository = {
   async revenueTrend(from?: Date, to?: Date) {
+    const Order = getModel<OrderDocument>('Order');
     return Order.aggregate([
       { $match: { isDeleted: false, paymentStatus: PaymentStatus.CAPTURED, ...dateFilter(from, to) } },
       {
@@ -24,6 +26,7 @@ export const analyticsRepository = {
   },
 
   async stationHeatmap(from?: Date, to?: Date) {
+    const Order = getModel<OrderDocument>('Order');
     return Order.aggregate([
       { $match: { isDeleted: false, ...dateFilter(from, to) } },
       { $group: { _id: '$deliveryStation', orderCount: { $sum: 1 } } },
@@ -33,6 +36,7 @@ export const analyticsRepository = {
   },
 
   async paymentBreakdown(from?: Date, to?: Date) {
+    const Order = getModel<OrderDocument>('Order');
     return Order.aggregate([
       { $match: { isDeleted: false, ...dateFilter(from, to) } },
       { $group: { _id: { method: '$paymentMethod', status: '$paymentStatus' }, count: { $sum: 1 }, totalPaise: { $sum: '$grandTotal' } } },
@@ -40,6 +44,7 @@ export const analyticsRepository = {
   },
 
   async orderFunnel(from?: Date, to?: Date) {
+    const Order = getModel<OrderDocument>('Order');
     const [placed, accepted, outForDelivery, delivered, cancelled] = await Promise.all([
       Order.countDocuments({ isDeleted: false, ...dateFilter(from, to) }),
       Order.countDocuments({

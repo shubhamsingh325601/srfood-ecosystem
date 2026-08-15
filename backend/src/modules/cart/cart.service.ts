@@ -1,7 +1,8 @@
 import { PRICING } from '@/config/constants';
+import { getModel } from '@/config/database';
 import { config } from '@/config/index';
 import { cmsService } from '@/modules/cms/cms.service';
-import { MenuItem, type MenuItemDocument } from '@/models/MenuItem.model';
+import type { MenuItemDocument } from '@/models/MenuItem.model';
 import { couponsService } from '@/modules/coupons/coupons.service';
 import { BadRequestError, NotFoundError } from '@/utils/errors';
 
@@ -69,6 +70,7 @@ function resolveCustomizationPrice(item: MenuItemDocument, input: CartItemInput)
 export const cartService = {
   /** Recomputes cart pricing entirely server-side — never trusts client-submitted prices/totals. Reused by Orders at checkout. */
   async validateCart(input: ValidateCartInput, userId?: string): Promise<ValidatedCart> {
+    const MenuItem = getModel<MenuItemDocument>('MenuItem');
     const menuItemIds = input.items.map((i) => i.menuItemId);
     const menuItems = await MenuItem.find({ _id: { $in: menuItemIds }, isDeleted: false });
     const menuItemMap = new Map(menuItems.map((m) => [m._id.toString(), m]));

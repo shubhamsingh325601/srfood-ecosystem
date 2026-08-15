@@ -1,5 +1,5 @@
 import type { Types } from 'mongoose';
-import { Schema, model } from 'mongoose';
+import { Schema } from 'mongoose';
 
 export interface RatingDocument {
   _id: Types.ObjectId;
@@ -17,7 +17,7 @@ export interface RatingDocument {
   updatedAt: Date;
 }
 
-const ratingSchema = new Schema<RatingDocument>(
+export const ratingSchema = new Schema<RatingDocument>(
   {
     orderId: { type: Schema.Types.ObjectId, ref: 'Order', required: true },
     passengerId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
@@ -35,5 +35,3 @@ const ratingSchema = new Schema<RatingDocument>(
 
 ratingSchema.index({ menuItemId: 1, createdAt: -1 });
 ratingSchema.index({ orderId: 1, passengerId: 1, menuItemId: 1 }, { unique: true });
-
-export const Rating = model<RatingDocument>('Rating', ratingSchema);

@@ -1,7 +1,9 @@
-import { Counter } from '@/models/Counter.model';
+import { getModel } from '@/config/database';
+import type { CounterDocument } from '@/models/Counter.model';
 
 /** Human-readable, sequential, collision-free order id: RB-YYYY-NNNNN (TRD-style). */
 export async function generateOrderId(): Promise<string> {
+  const Counter = getModel<CounterDocument>('Counter');
   const year = new Date().getFullYear();
   const key = `order:${year}`;
   const counter = await Counter.findByIdAndUpdate(key, { $inc: { seq: 1 } }, { upsert: true, new: true });

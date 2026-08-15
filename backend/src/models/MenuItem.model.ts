@@ -1,5 +1,5 @@
 import type { Types } from 'mongoose';
-import { Schema, model } from 'mongoose';
+import { Schema } from 'mongoose';
 
 export interface CustomizationOption {
   label: string;
@@ -50,7 +50,7 @@ const customizationGroupSchema = new Schema<CustomizationGroup>(
   { _id: false },
 );
 
-const menuItemSchema = new Schema<MenuItemDocument>(
+export const menuItemSchema = new Schema<MenuItemDocument>(
   {
     categoryId: { type: Schema.Types.ObjectId, ref: 'Category', required: true },
     name: { type: String, required: true, trim: true, maxlength: 120 },
@@ -74,5 +74,3 @@ const menuItemSchema = new Schema<MenuItemDocument>(
 
 menuItemSchema.index({ categoryId: 1 });
 menuItemSchema.index({ isAvailable: 1 });
-
-export const MenuItem = model<MenuItemDocument>('MenuItem', menuItemSchema);

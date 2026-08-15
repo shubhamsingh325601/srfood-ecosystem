@@ -1,5 +1,5 @@
 import type { Types } from 'mongoose';
-import { Schema, model } from 'mongoose';
+import { Schema } from 'mongoose';
 
 import { CmsContentType } from '@/types/domain.types';
 
@@ -15,7 +15,7 @@ export interface CmsContentDocument {
   updatedAt: Date;
 }
 
-const cmsContentSchema = new Schema<CmsContentDocument>(
+export const cmsContentSchema = new Schema<CmsContentDocument>(
   {
     type: { type: String, enum: Object.values(CmsContentType), required: true, unique: true },
     data: { type: Schema.Types.Mixed, required: true },
@@ -26,5 +26,3 @@ const cmsContentSchema = new Schema<CmsContentDocument>(
   },
   { timestamps: true, collection: 'cmsContent' },
 );
-
-export const CmsContent = model<CmsContentDocument>('CmsContent', cmsContentSchema);

@@ -1,5 +1,5 @@
 import type { Types } from 'mongoose';
-import { Schema, model } from 'mongoose';
+import { Schema } from 'mongoose';
 
 import { SupportTicketPriority, SupportTicketStatus } from '@/types/domain.types';
 
@@ -23,7 +23,7 @@ export interface SupportTicketDocument {
   updatedAt: Date;
 }
 
-const supportTicketSchema = new Schema<SupportTicketDocument>(
+export const supportTicketSchema = new Schema<SupportTicketDocument>(
   {
     ticketNumber: { type: String, required: true, unique: true },
     userId: { type: Schema.Types.ObjectId, ref: 'User', index: true },
@@ -44,5 +44,3 @@ const supportTicketSchema = new Schema<SupportTicketDocument>(
 );
 
 supportTicketSchema.index({ status: 1 });
-
-export const SupportTicket = model<SupportTicketDocument>('SupportTicket', supportTicketSchema);

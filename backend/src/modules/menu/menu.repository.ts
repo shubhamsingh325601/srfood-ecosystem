@@ -1,56 +1,69 @@
-import { Category } from '@/models/Category.model';
-import { MenuItem } from '@/models/MenuItem.model';
+import { getModel } from '@/config/database';
+import type { CategoryDocument } from '@/models/Category.model';
+import type { MenuItemDocument } from '@/models/MenuItem.model';
 
 export const menuRepository = {
   async listCategories(includeInactive: boolean) {
+    const Category = getModel<CategoryDocument>('Category');
     const query = includeInactive ? { isDeleted: false } : { isDeleted: false, isActive: true };
     return Category.find(query).sort({ displayOrder: 1, name: 1 });
   },
 
   async findCategoryBySlug(slug: string) {
+    const Category = getModel<CategoryDocument>('Category');
     return Category.findOne({ slug, isDeleted: false });
   },
 
   async createCategory(data: Record<string, unknown>) {
+    const Category = getModel<CategoryDocument>('Category');
     return Category.create(data);
   },
 
   async updateCategory(id: string, data: Record<string, unknown>) {
+    const Category = getModel<CategoryDocument>('Category');
     return Category.findOneAndUpdate({ _id: id, isDeleted: false }, data, { new: true });
   },
 
   async softDeleteCategory(id: string) {
+    const Category = getModel<CategoryDocument>('Category');
     return Category.findOneAndUpdate({ _id: id, isDeleted: false }, { isDeleted: true, isActive: false }, { new: true });
   },
 
   async popularItems(limit: number) {
+    const MenuItem = getModel<MenuItemDocument>('MenuItem');
     return MenuItem.find({ isDeleted: false, isAvailable: true, isBestseller: true })
       .sort({ avgRating: -1, ratingCount: -1 })
       .limit(limit);
   },
 
   async listItems(includeUnavailable: boolean) {
+    const MenuItem = getModel<MenuItemDocument>('MenuItem');
     const query = includeUnavailable ? { isDeleted: false } : { isDeleted: false, isAvailable: true };
     return MenuItem.find(query).sort({ name: 1 });
   },
 
   async findItemById(id: string) {
+    const MenuItem = getModel<MenuItemDocument>('MenuItem');
     return MenuItem.findOne({ _id: id, isDeleted: false });
   },
 
   async findPublicItemById(id: string) {
+    const MenuItem = getModel<MenuItemDocument>('MenuItem');
     return MenuItem.findOne({ _id: id, isDeleted: false });
   },
 
   async createItem(data: Record<string, unknown>) {
+    const MenuItem = getModel<MenuItemDocument>('MenuItem');
     return MenuItem.create(data);
   },
 
   async updateItem(id: string, data: Record<string, unknown>, updatedBy: string) {
+    const MenuItem = getModel<MenuItemDocument>('MenuItem');
     return MenuItem.findOneAndUpdate({ _id: id, isDeleted: false }, { ...data, updatedBy }, { new: true });
   },
 
   async softDeleteItem(id: string, updatedBy: string) {
+    const MenuItem = getModel<MenuItemDocument>('MenuItem');
     return MenuItem.findOneAndUpdate({ _id: id, isDeleted: false }, { isDeleted: true, updatedBy }, { new: true });
   },
 };

@@ -1,6 +1,7 @@
 import { NOTIFICATION_RETRY } from '@/config/constants';
-import { Notification } from '@/models/Notification.model';
-import { User } from '@/models/User.model';
+import { getModel } from '@/config/database';
+import type { NotificationDocument } from '@/models/Notification.model';
+import type { UserDocument } from '@/models/User.model';
 import { ADMIN_ROLES, NotificationChannel, type NotificationEvent } from '@/types/domain.types';
 import { logger } from '@/utils/logger';
 
@@ -31,6 +32,9 @@ async function dispatchWithRetry(channel: NotificationChannel, to: string, title
  * matches the PRD's "notify within 30s, retry 3x with backoff" target without adding queue infra.
  */
 export async function notifyUser(userId: string, event: NotificationEvent, title: string, body: string): Promise<void> {
+  const User = getModel<UserDocument>('User');
+  const Notification = getModel<NotificationDocument>('Notification');
+
   const user = await User.findById(userId);
   if (!user) return;
 
@@ -71,6 +75,9 @@ export async function notifyUser(userId: string, event: NotificationEvent, title
  * alerts (e.g. new order placed) where SMS/email to every admin would be excessive.
  */
 export async function notifyAdmins(event: NotificationEvent, title: string, body: string): Promise<void> {
+  const User = getModel<UserDocument>('User');
+  const Notification = getModel<NotificationDocument>('Notification');
+
   const admins = await User.find({ role: { $in: ADMIN_ROLES }, isDeleted: false }).select('_id');
   await Promise.all(
     admins.map((admin) =>
