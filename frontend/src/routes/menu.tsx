@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { getMenu } from "@/features/menu/services/menuApi";
 import { buildCategoryNameMap, mapMenuItemToFood } from "@/features/menu/mappers";
+import { APP_NAME } from "@/lib/brand";
 
 const menuSearchSchema = z.object({
   q: z.string().optional(),
@@ -18,7 +19,7 @@ export const Route = createFileRoute("/menu")({
   validateSearch: menuSearchSchema,
   head: () => ({
     meta: [
-      { title: "Menu – SRFOOD" },
+      { title: `Menu – ${APP_NAME}` },
       {
         name: "description",
         content: "Browse our full menu of thalis, biryanis, snacks, beverages and desserts.",

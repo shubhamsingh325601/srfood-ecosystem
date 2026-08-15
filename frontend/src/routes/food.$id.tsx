@@ -21,9 +21,10 @@ import { buildCategoryNameMap, mapMenuItemToFood } from "@/features/menu/mappers
 import { getMenuItemRatings } from "@/features/ratings/services/ratingsApi";
 import { useCartStore } from "@/store/cartStore";
 import { useFavoritesStore } from "@/store/favoritesStore";
+import { APP_NAME } from "@/lib/brand";
 
 export const Route = createFileRoute("/food/$id")({
-  head: () => ({ meta: [{ title: "Dish – SRFOOD" }] }),
+  head: () => ({ meta: [{ title: `Dish – ${APP_NAME}` }] }),
   component: FoodDetailPage,
 });
 

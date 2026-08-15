@@ -3,10 +3,12 @@ export const APP_ID = import.meta.env.VITE_APP_ID as string | undefined;
 export const APP_NAME = import.meta.env.VITE_APP_NAME ?? "SRFOOD";
 export const APP_TAGLINE = import.meta.env.VITE_APP_TAGLINE ?? "";
 export const APP_DESCRIPTION = import.meta.env.VITE_APP_DESCRIPTION ?? "";
-export const APP_OG_TITLE = import.meta.env.VITE_APP_OG_TITLE ?? APP_TAGLINE;
+export const APP_OG_TITLE = import.meta.env.VITE_APP_OG_TITLE ?? `${APP_NAME} – ${APP_TAGLINE}`;
 export const APP_OG_DESCRIPTION = import.meta.env.VITE_APP_OG_DESCRIPTION ?? APP_DESCRIPTION;
 export const APP_TWITTER_TITLE = APP_OG_TITLE;
 export const APP_TWITTER_DESCRIPTION = APP_OG_DESCRIPTION;
+export const APP_FAVICON = import.meta.env.VITE_APP_FAVICON ?? "favicon.png";
+export const APP_SERVICE_AREA = import.meta.env.VITE_APP_SERVICE_AREA ?? "";
 
 export const FEATURES = {
   trains: import.meta.env.VITE_FEATURE_TRAINS === "true",

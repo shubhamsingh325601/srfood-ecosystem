@@ -20,9 +20,10 @@ import { Toaster } from "@/components/ui/sonner";
 import {
   APP_ID,
   APP_DESCRIPTION,
+  APP_FAVICON,
   APP_OG_DESCRIPTION,
   APP_OG_TITLE,
-  APP_TAGLINE,
+  APP_THEME,
   APP_TWITTER_DESCRIPTION,
   APP_TWITTER_TITLE,
   FEATURES,
@@ -78,23 +79,23 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: `SRFOOD – ${APP_TAGLINE}` },
+      { title: APP_OG_TITLE },
       {
         name: "description",
         content: APP_DESCRIPTION,
       },
-      { property: "og:title", content: `SRFOOD – ${APP_TAGLINE}` },
+      { property: "og:title", content: APP_OG_TITLE },
       {
         property: "og:description",
-        content: APP_DESCRIPTION,
+        content: APP_OG_DESCRIPTION,
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
 
-      { name: "twitter:title", content: `SRFOOD – ${APP_TAGLINE}` },
+      { name: "twitter:title", content: APP_TWITTER_TITLE },
       {
         name: "twitter:description",
-        content: APP_DESCRIPTION,
+        content: APP_TWITTER_DESCRIPTION,
       },
       {
         property: "og:image",
@@ -108,6 +109,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
     ],
     links: [
+      { rel: "icon", href: `/${APP_FAVICON}` },
       { rel: "stylesheet", href: appCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },

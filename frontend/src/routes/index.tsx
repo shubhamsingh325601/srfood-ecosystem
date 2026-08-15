@@ -5,12 +5,13 @@ import { PopularItems } from "@/components/home/PopularItems";
 import { OfferBanner } from "@/components/home/OfferBanner";
 import { Features } from "@/components/home/Features";
 import { Reviews } from "@/components/home/Reviews";
+import { APP_DESCRIPTION, APP_OG_TITLE } from "@/lib/brand";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "SRFOOD – Tasty Food, On Track" },
-      { name: "description", content: "Order hygienic, fresh meals delivered to your train seat with live tracking." },
+      { title: APP_OG_TITLE },
+      { name: "description", content: APP_DESCRIPTION },
     ],
   }),
   component: HomePage,

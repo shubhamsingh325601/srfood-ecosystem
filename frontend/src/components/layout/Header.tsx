@@ -13,7 +13,7 @@ import { useAuthStore } from "@/store/authStore";
 import { useCartStore, selectCartCount } from "@/store/cartStore";
 import { useDeliveryStore } from "@/store/deliveryStore";
 import { getSettings } from "@/features/cms/services/cmsApi";
-import { FEATURES } from "@/lib/brand";
+import { APP_SERVICE_AREA, FEATURES } from "@/lib/brand";
 
 const WHATSAPP_MESSAGE = "Hi, I need help with my order.";
 
@@ -95,6 +95,15 @@ export function Header() {
         )}
         {FEATURES.trains && (
           <DeliveryTrainDialog open={trainDialogOpen} onOpenChange={setTrainDialogOpen} />
+        )}
+        {!FEATURES.trains && APP_SERVICE_AREA && (
+          <div className="hidden md:flex items-center gap-2 px-3 py-2 rounded-lg border text-left">
+            <MapPin className="w-4 h-4 text-primary" />
+            <div className="text-xs leading-tight">
+              <div className="text-muted-foreground">Delivering in</div>
+              <div className="font-semibold text-foreground">{APP_SERVICE_AREA}</div>
+            </div>
+          </div>
         )}
 
         <form onSubmit={submit} className="flex-1 max-w-xl relative hidden sm:block">

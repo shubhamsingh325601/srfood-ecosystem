@@ -4,9 +4,10 @@ import { Check, ChefHat, Bike, PackageCheck, Circle } from "lucide-react";
 import { listOrders } from "@/features/orders/services/ordersApi";
 import { toDisplayStatus, type DisplayStatus } from "@/features/orders/statusDisplay";
 import { paiseToRupees } from "@/features/menu/mappers";
+import { APP_NAME } from "@/lib/brand";
 
 export const Route = createFileRoute("/track")({
-  head: () => ({ meta: [{ title: "Track Order – SRFOOD" }] }),
+  head: () => ({ meta: [{ title: `Track Order – ${APP_NAME}` }] }),
   component: TrackPage,
 });
 

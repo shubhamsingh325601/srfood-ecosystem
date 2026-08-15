@@ -12,12 +12,13 @@ import { toast } from "sonner";
 import { getSettings } from "@/features/cms/services/cmsApi";
 import { createSupportTicket } from "@/features/support/services/supportApi";
 import { getApiErrorMessage } from "@/lib/axios";
+import { APP_NAME } from "@/lib/brand";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
     meta: [
-      { title: "Contact – SRFOOD" },
-      { name: "description", content: "Get in touch with SRFOOD support." },
+      { title: `Contact – ${APP_NAME}` },
+      { name: "description", content: `Get in touch with ${APP_NAME} support.` },
     ],
   }),
   component: ContactPage,

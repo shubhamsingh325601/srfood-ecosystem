@@ -4,9 +4,10 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/Button";
 import { logoutRequest } from "@/features/auth/services/authApi";
 import { useAuthStore } from "@/store/authStore";
+import { APP_NAME } from "@/lib/brand";
 
 export const Route = createFileRoute("/profile")({
-  head: () => ({ meta: [{ title: "My Profile â€“ SRFOOD" }] }),
+  head: () => ({ meta: [{ title: `My Profile – ${APP_NAME}` }] }),
   component: ProfilePage,
 });
 

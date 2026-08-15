@@ -112,9 +112,10 @@ import type {
   LegalContent,
   SettingsContent,
 } from "@/features/cms/types";
+import { APP_NAME } from "@/lib/brand";
 
 export const Route = createFileRoute("/admin")({
-  head: () => ({ meta: [{ title: "Admin Panel – SRFOOD" }] }),
+  head: () => ({ meta: [{ title: `Admin Panel – ${APP_NAME}` }] }),
   component: AdminPage,
 });
 

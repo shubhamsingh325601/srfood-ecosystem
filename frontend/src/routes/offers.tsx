@@ -4,9 +4,10 @@ import { Tag, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { listActiveCoupons } from "@/features/coupons/services/couponsApi";
 import { paiseToRupees } from "@/features/menu/mappers";
+import { APP_NAME } from "@/lib/brand";
 
 export const Route = createFileRoute("/offers")({
-  head: () => ({ meta: [{ title: "Offers – SRFOOD" }] }),
+  head: () => ({ meta: [{ title: `Offers – ${APP_NAME}` }] }),
   component: OffersPage,
 });
 

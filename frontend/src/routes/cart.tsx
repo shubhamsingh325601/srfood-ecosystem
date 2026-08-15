@@ -7,9 +7,10 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { validateCoupon } from "@/features/coupons/services/couponsApi";
 import { getApiErrorMessage } from "@/lib/axios";
+import { APP_NAME } from "@/lib/brand";
 
 export const Route = createFileRoute("/cart")({
-  head: () => ({ meta: [{ title: "Your Cart – SRFOOD" }] }),
+  head: () => ({ meta: [{ title: `Your Cart – ${APP_NAME}` }] }),
   component: CartPage,
 });
 

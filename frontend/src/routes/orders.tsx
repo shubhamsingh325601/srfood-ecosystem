@@ -5,9 +5,10 @@ import { Package } from "lucide-react";
 import { listOrders } from "@/features/orders/services/ordersApi";
 import { toDisplayStatus } from "@/features/orders/statusDisplay";
 import { paiseToRupees } from "@/features/menu/mappers";
+import { APP_NAME } from "@/lib/brand";
 
 export const Route = createFileRoute("/orders")({
-  head: () => ({ meta: [{ title: "My Orders – SRFOOD" }] }),
+  head: () => ({ meta: [{ title: `My Orders – ${APP_NAME}` }] }),
   component: OrdersPage,
 });
 

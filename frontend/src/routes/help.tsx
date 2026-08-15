@@ -7,9 +7,10 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { getFaqs } from "@/features/cms/services/cmsApi";
+import { APP_NAME } from "@/lib/brand";
 
 export const Route = createFileRoute("/help")({
-  head: () => ({ meta: [{ title: "Help & Support – SRFOOD" }] }),
+  head: () => ({ meta: [{ title: `Help & Support – ${APP_NAME}` }] }),
   component: HelpPage,
 });
 

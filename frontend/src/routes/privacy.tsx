@@ -1,12 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { getPrivacyPolicy } from "@/features/cms/services/cmsApi";
+import { APP_NAME } from "@/lib/brand";
 
 export const Route = createFileRoute("/privacy")({
   head: () => ({
     meta: [
-      { title: "Privacy Policy – SRFOOD" },
-      { name: "description", content: "SRFOOD privacy policy." },
+      { title: `Privacy Policy – ${APP_NAME}` },
+      { name: "description", content: `${APP_NAME} privacy policy.` },
     ],
   }),
   component: PrivacyPage,

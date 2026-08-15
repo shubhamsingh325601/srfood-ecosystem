@@ -4,7 +4,7 @@ import { Link } from "@tanstack/react-router";
 import { Logo } from "@/components/brand/Logo";
 import { getSettings } from "@/features/cms/services/cmsApi";
 import type { SettingsContent } from "@/features/cms/types";
-import { APP_DESCRIPTION } from "@/lib/brand";
+import { APP_DESCRIPTION, APP_NAME } from "@/lib/brand";
 
 const EMPTY_SETTINGS: SettingsContent = {
   social: {},
@@ -97,7 +97,7 @@ export function Footer() {
         </div>
       </div>
       <div className="border-t px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-muted-foreground">
-        <span>© {new Date().getFullYear()} SRFOOD. All rights reserved.</span>
+        <span>© {new Date().getFullYear()} {APP_NAME}. All rights reserved.</span>
         <div className="flex items-center gap-3">
           <span>Follow Us</span>
           {socialLinks.map(({ I, href }, i) => (

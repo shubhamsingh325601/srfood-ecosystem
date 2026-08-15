@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { getMenu } from "@/features/menu/services/menuApi";
+import { APP_NAME } from "@/lib/brand";
 
 export const Route = createFileRoute("/categories")({
-  head: () => ({ meta: [{ title: "Categories – SRFOOD" }] }),
+  head: () => ({ meta: [{ title: `Categories – ${APP_NAME}` }] }),
   component: CategoriesPage,
 });
 

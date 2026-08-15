@@ -1,12 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { getTerms } from "@/features/cms/services/cmsApi";
+import { APP_NAME } from "@/lib/brand";
 
 export const Route = createFileRoute("/terms")({
   head: () => ({
     meta: [
-      { title: "Terms of Service – SRFOOD" },
-      { name: "description", content: "SRFOOD terms of service." },
+      { title: `Terms of Service – ${APP_NAME}` },
+      { name: "description", content: `${APP_NAME} terms of service.` },
     ],
   }),
   component: TermsPage,

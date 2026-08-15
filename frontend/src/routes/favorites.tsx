@@ -6,9 +6,10 @@ import { Button } from "@/components/ui/Button";
 import { getMenu } from "@/features/menu/services/menuApi";
 import { buildCategoryNameMap, mapMenuItemToFood } from "@/features/menu/mappers";
 import { useFavoritesStore } from "@/store/favoritesStore";
+import { APP_NAME } from "@/lib/brand";
 
 export const Route = createFileRoute("/favorites")({
-  head: () => ({ meta: [{ title: "My Favourites â€“ SRFOOD" }] }),
+  head: () => ({ meta: [{ title: `My Favourites – ${APP_NAME}` }] }),
   component: FavoritesPage,
 });
 

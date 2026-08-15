@@ -24,6 +24,7 @@ import { submitPaymentReference, declinePayment } from "@/features/payments/serv
 import type { UpiPaymentInfo } from "@/features/orders/types";
 import { getStations } from "@/features/stations/services/stationsApi";
 import { getApiErrorMessage } from "@/lib/axios";
+import { APP_NAME, FEATURES } from "@/lib/brand";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/label";
@@ -39,7 +40,7 @@ import {
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/checkout")({
-  head: () => ({ meta: [{ title: "Checkout – SRFOOD" }] }),
+  head: () => ({ meta: [{ title: `Checkout – ${APP_NAME}` }] }),
   component: CheckoutPage,
 });
 

@@ -17,10 +17,11 @@ import {
   type SignupFormValues,
 } from "@/features/auth/schemas/authSchemas";
 import { getApiErrorMessage } from "@/lib/axios";
+import { APP_NAME } from "@/lib/brand";
 import { isAdminRole, useAuthStore } from "@/store/authStore";
 
 export const Route = createFileRoute("/auth")({
-  head: () => ({ meta: [{ title: "Login – SRFOOD" }] }),
+  head: () => ({ meta: [{ title: `Login – ${APP_NAME}` }] }),
   component: AuthPage,
 });
 
@@ -55,7 +56,7 @@ function PasswordInput({
 function AuthPage() {
   return (
     <div className="max-w-md mx-auto px-4 py-10">
-      <h1 className="text-2xl font-bold text-center mb-6">Welcome to SRFOOD</h1>
+      <h1 className="text-2xl font-bold text-center mb-6">Welcome to {APP_NAME}</h1>
       <div className="bg-card border rounded-2xl p-5">
         <Tabs defaultValue="login">
           <TabsList className="grid grid-cols-2 mb-4">
